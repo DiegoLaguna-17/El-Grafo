@@ -118,39 +118,41 @@
         function dibujarArco(arc) {
             const deNodo = nodos.find(n => n.id === arc.de);
             const haciaNodo = nodos.find(n => n.id === arc.hacia);
-            const linea = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
 
             const diferenciax = haciaNodo.x - deNodo.x;
             const diferenciay = haciaNodo.y - deNodo.y;
             const distancia = Math.sqrt(diferenciax * diferenciax + diferenciay * diferenciay);
-            const desplazamientoX = (diferenciax / distancia) * 10;
-            const desplazamientoY = (diferenciay / distancia) * 10;
-            linea.setAttribute("x1", deNodo.x + desplazamientoX);
-            linea.setAttribute("y1", deNodo.y + desplazamientoY);
-            linea.setAttribute("x2", haciaNodo.x - desplazamientoX);
-            linea.setAttribute("y2", haciaNodo.y - desplazamientoY);
-            linea.setAttribute("class", "arco");
+
+            const desplazamientoX = (diferenciax / distancia) * 90;
+            const desplazamientoY = (diferenciay / distancia) * 90;
+
+            const controlCurvaX = (deNodo.x + haciaNodo.x) / 2 - desplazamientoX;
+            const controlCurvaY = (deNodo.y + haciaNodo.y) / 2 + desplazamientoY;
+
+            path.setAttribute("d", `M ${deNodo.x} ${deNodo.y} Q ${controlCurvaX} ${controlCurvaY} ${haciaNodo.x} ${haciaNodo.y}`);
+            path.setAttribute("class", "arco");
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", "black");
             
             const peso = document.createElementNS("http://www.w3.org/2000/svg", "text");
             const medioX = (deNodo.x + haciaNodo.x) / 2;
             const medioY = (deNodo.y + haciaNodo.y) / 2;
 
             // Ajustar el texto del peso para que se sobreponga a la flecha
-            const desplazamientoTextoX = (diferenciax / distancia) * 20; // Ajuste para alejar el texto de la flecha
-            const desplazamientoTextoY = (diferenciay / distancia) * 20; // Ajuste para alejar el texto de la flecha
-            peso.setAttribute("x", medioX + desplazamientoTextoX);
-            peso.setAttribute("y", medioY + desplazamientoTextoY);
+            peso.setAttribute("x", controlCurvaX);
+            peso.setAttribute("y", controlCurvaY);
             peso.setAttribute("class", "peso");
             peso.textContent = arc.valor;
 
-            linea.addEventListener("click", () => {
+            path.addEventListener("click", () => {
                 const weight = prompt("Ingrese peso:", arc.valor);
                 arc.valor = parseInt(weight) || 1;
                 peso.textContent = arc.valor; // Actualizar el texto con el nuevo peso
                 dibujarNodos();
             });
             
-            svg.appendChild(linea);
+            svg.appendChild(path);
             svg.appendChild(peso);
             generarMatriz();
         }
