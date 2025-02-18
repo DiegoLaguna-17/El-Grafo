@@ -12,6 +12,10 @@
         .id { font-size: 2vh; fill: white; text-anchor: middle; dominant-baseline: middle; }
         .peso{font-size:4vh; fill: red; text-anchor: middle; dominant-baseline: middle; font-weight: bold;}
         .controls {  margin-top: 3vh; }
+        
+        .menu { position: absolute; background: white; border: 1px solid black; padding: 5px; display: none; }
+        .menu button { display: block; width: 100%; margin: 2px 0; }
+
         table.matriz { border-collapse: collapse;margin: auto; width: 100%; text-align: center;font-size: 2vh;  }
         table.matriz th, table.matriz td { border: 1px solid black; width:fit-content;padding: 10px; }
     </style>
@@ -55,30 +59,78 @@
        
     </div>
 
+    <div id="menu" class="menu">
+        <button onclick="cambiarNombre()">Cambiar nombre</button>
+    </div>
+
 </center>
-    
+
     <script>
-        let nodos = [], arcos = [], nodoElegido = null;
+        let nodos = [], arcos = [], nodoElegido = null, nodoEdicion= null;
+        // Menú de Edición de Nodos
+        const menu = document.getElementById("menu");
         const svg = document.getElementById("canvas");
         let  c=1;
-        
-            svg.addEventListener("dblclick", (e) => {
-                
-                const x = e.clientX-10, y = e.clientY-23;
-                const id = c; 
-                
-                //agregar los nodos a, b, c, d...
-                if(nodos.length<=11){
-                    c++;
-                    nodos.push({ id, x, y }); 
-                    dibujarNodos();
-                    generarMatriz();
-                }
 
-            });
+
+        // Evita que se abra el menú del navegador
+        // con el click derecho
+        svg.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+        });
+        
+        // Obtener posición del nodo nuevo
+        // de forma dinámica (respecto al SVG)
+        svg.addEventListener("dblclick", (e) => {
+            const rect = svg.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const id = c;
+            if (nodos.length < 12){
+                c++;
+                nodos.push({ id, x, y, nombre: `Nodo ${id}` });
+                dibujarNodos();
+                generarMatriz();
+            }
+            
+        });
+
+        // Ubicar y mostrar el menú
+        // para editar el nodo
+        svg.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+            const rect = svg.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            nodoEdicion = nodos.find(n => Math.hypot(n.x - x, n.y - y) < 30);
+            if (nodoEdicion) {
+                menu.style.left = `${e.clientX}px`;
+                menu.style.top = `${e.clientY}px`;
+                menu.style.display = "block";
+            } else {
+                menu.style.display = "none";
+            }
+        });
+
+        // Ocultar el menú cuando se hace
+        // click fuera del área del menú
+        document.addEventListener("click", () => {
+            menu.style.display = "none";
+        });
+
+        // Función para cambiar el nombre
+        // del nodo
+        function cambiarNombre() {
+            const nuevoNombre = prompt("Ingrese nuevo nombre:", nodoEdicion.nombre);
+            if (nuevoNombre) {
+                nodoEdicion.nombre = nuevoNombre;
+                dibujarNodos();
+            }
+        }
+
 
         function dibujarNodos() {
-            
             svg.innerHTML = `
                 <defs>
                     <marker id="arrow" markerWidth="15" markerHeight="10" refX="15" refY="5" orient="auto" markerUnits="strokeWidth">
@@ -102,19 +154,18 @@
                     nodoElegido = null;
                 });
 
-               
-                
                 const nombre = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 nombre.setAttribute("x", n.x);
                 nombre.setAttribute("y", n.y);
                 nombre.setAttribute("class", "id");
-                nombre.textContent = "Nodo "+n.id;
+                nombre.textContent = n.nombre;
                 
                 svg.appendChild(circulo);
                 svg.appendChild(nombre);
             });
         }
         
+
         function dibujarArco(arc) {
             const deNodo = nodos.find(n => n.id === arc.de);
             const haciaNodo = nodos.find(n => n.id === arc.hacia);
@@ -155,145 +206,138 @@
             generarMatriz();
         }
 
+
         function generarMatriz() {
             let tamaño = nodos.length;
+            let matriz = Array(tamaño + 1).fill().map(() => Array(tamaño + 1).fill("0"));
 
-            
-            
-                let matriz = Array(tamaño + 1).fill().map(() => Array(tamaño + 1).fill("0"));
+            matriz[0][0] = " ";
+            nodos.forEach((n, i) => {
+                matriz[0][i + 1] = "Nodo " + n.id;
+                matriz[i + 1][0] = "Nodo " + n.id;
+            });
 
-                matriz[0][0] = " ";
-                nodos.forEach((n, i) => {
-                    matriz[0][i + 1] = "Nodo " + n.id;
-                    matriz[i + 1][0] = "Nodo " + n.id;
+            arcos.forEach(e => {
+                let origen = nodos.findIndex(n => n.id === e.de) + 1;
+                let destino = nodos.findIndex(n => n.id === e.hacia) + 1;
+                matriz[origen][destino] = e.valor;
+            });
+
+            let tabla = document.getElementById("tablaMatriz");
+            tabla.innerHTML = "";
+            matriz.forEach(fila => {
+                let tr = document.createElement("tr");
+                fila.forEach(celda => {
+                    let td = document.createElement(tr.children.length ? "td" : "th");
+                    td.textContent = celda;
+                    tr.appendChild(td);
                 });
+                tabla.appendChild(tr);
+            });
 
-                arcos.forEach(e => {
-                    let origen = nodos.findIndex(n => n.id === e.de) + 1;
-                    let destino = nodos.findIndex(n => n.id === e.hacia) + 1;
-                    matriz[origen][destino] = e.valor;
-                });
-
-                let tabla = document.getElementById("tablaMatriz");
-                tabla.innerHTML = "";
-                matriz.forEach(fila => {
-                    let tr = document.createElement("tr");
-                    fila.forEach(celda => {
-                        let td = document.createElement(tr.children.length ? "td" : "th");
-                        td.textContent = celda;
-                        tr.appendChild(td);
-                    });
-                    tabla.appendChild(tr);
-                });
-
-                if(nodos.length>7){
-                    document.getElementById("tablaMatriz").style="font-size:1vh;padding:1px";
-                }
-            
+            if(nodos.length>7){
+                document.getElementById("tablaMatriz").style="font-size:1vh;padding:1px";
+            }
         }
-
 
         const vaciarBtn = document.getElementById("vaciarBtn");
 
-// Selecciona el contenedor del SVG
+        // Selecciona el contenedor del SVG
+
+        // Agregar el evento click al botón de vaciar
+        vaciarBtn.addEventListener("click", function() {
+            // Vacia el contenido del SVG
+            svg.innerHTML = "";
+            
+            // También puedes resetear cualquier otra variable que esté almacenando los nodos o vértices
+            nodos = [];
+            arcos = [];
+            c=1;
+            generarMatriz();
+            mostrarListaNodos();
+        });
 
 
-// Agregar el evento click al botón de vaciar
-vaciarBtn.addEventListener("click", function() {
-    // Vacia el contenido del SVG
-    svg.innerHTML = "";
-    
-    // También puedes resetear cualquier otra variable que esté almacenando los nodos o vértices
-    nodos = [];
-    arcos = [];
-    c=1;
-    generarMatriz();
-    mostrarListaNodos();
-});
+        document.getElementById("guardarGrafo").addEventListener("click",function(){
+            let nom="";
+            const nombreArchivo = prompt("Ingrese el nombre que sea para el archivo:", nom);
+            if(!nombreArchivo){
+                return;
+            }
+            const datos={
+                nodosJ:nodos,
+                arcosJ:arcos
+            };
+            const jsonString = JSON.stringify(datos, null, 2);
+        
+            // Crear un Blob con el JSON
+            const blob = new Blob([jsonString], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = nombreArchivo+".json";
 
-document.getElementById("guardarGrafo").addEventListener("click",function(){
-    let nom="";
-    const nombreArchivo = prompt("Ingrese el nombre que sea para el archivo:", nom);
-    if(!nombreArchivo){
-        return;
-    }
-    const datos={
-        nodosJ:nodos,
-        arcosJ:arcos
-    };
-    const jsonString = JSON.stringify(datos, null, 2);
-   
-    // Crear un Blob con el JSON
-    const blob = new Blob([jsonString], { type: "application/json" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = nombreArchivo+".json";
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-});
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
 
 
-document.getElementById("importarDato").addEventListener("click", function () {
-    // Abrir el explorador de archivos
-    document.getElementById("archivo").click();
-});
+        document.getElementById("importarDato").addEventListener("click", function () {
+            // Abrir el explorador de archivos
+            document.getElementById("archivo").click();
+        });
 
-document.getElementById("archivo").addEventListener("change", function (event) {
-    const file = event.target.files[0]; // Obtener el archivo seleccionado
-    if (!file) return;
 
-    const reader = new FileReader(); // Crear lector de archivos
+        document.getElementById("archivo").addEventListener("change", function (event) {
+            const file = event.target.files[0]; // Obtener el archivo seleccionado
+            if (!file) return;
 
-    reader.onload = function (e) {
-        try {
-            const jsonData = JSON.parse(e.target.result); // Convertir JSON a objeto JS
-            nodos = jsonData.nodosJ || [];
-            arcos = jsonData.arcosJ || [];
+            const reader = new FileReader(); // Crear lector de archivos
+
+            reader.onload = function (e) {
+                try {
+                    const jsonData = JSON.parse(e.target.result); // Convertir JSON a objeto JS
+                    nodos = jsonData.nodosJ || [];
+                    arcos = jsonData.arcosJ || [];
+                    dibujarNodos();
+                    generarMatriz();
+                    alert("Archivo importado correctamente.");
+                } catch (error) {
+                    alert("Error al leer el archivo JSON.");
+                    console.error(error);
+                }
+            };
+
+            reader.readAsText(file); // Leer archivo como texto
+        });
+
+
+        function mostrarListaNodos() {
+            const listaDiv = document.getElementById("listaNodos");
+            listaDiv.innerHTML = ""; // Limpiar la lista antes de mostrarla
+
+            nodos.forEach(nodo => {
+                const boton = document.createElement("button");
+                boton.textContent = `Eliminar Nodo ${nodo.id}`;
+                boton.style.margin = "5px";
+                boton.onclick = () => eliminarNodo(nodo.id);
+                listaDiv.appendChild(boton);
+            });
+        }
+
+
+        function eliminarNodo(id) {
+            // Filtrar la lista de nodos para eliminar el nodo seleccionado
+            nodos = nodos.filter(n => n.id !== id);
+
+            // Filtrar la lista de arcos para eliminar aquellos relacionados con el nodo
+            arcos = arcos.filter(arc => arc.de !== id && arc.hacia !== id);
+
+            // Redibujar el grafo actualizado
             dibujarNodos();
             generarMatriz();
-            alert("Archivo importado correctamente.");
-        } catch (error) {
-            alert("Error al leer el archivo JSON.");
-            console.error(error);
+            mostrarListaNodos();
         }
-    };
-
-    
-    
-
-    reader.readAsText(file); // Leer archivo como texto
-});
-
-
-
-
-function mostrarListaNodos() {
-    const listaDiv = document.getElementById("listaNodos");
-    listaDiv.innerHTML = ""; // Limpiar la lista antes de mostrarla
-
-    nodos.forEach(nodo => {
-        const boton = document.createElement("button");
-        boton.textContent = `Eliminar Nodo ${nodo.id}`;
-        boton.style.margin = "5px";
-        boton.onclick = () => eliminarNodo(nodo.id);
-        listaDiv.appendChild(boton);
-    });
-}
-
-function eliminarNodo(id) {
-    // Filtrar la lista de nodos para eliminar el nodo seleccionado
-    nodos = nodos.filter(n => n.id !== id);
-
-    // Filtrar la lista de arcos para eliminar aquellos relacionados con el nodo
-    arcos = arcos.filter(arc => arc.de !== id && arc.hacia !== id);
-
-    // Redibujar el grafo actualizado
-    dibujarNodos();
-    generarMatriz();
-    mostrarListaNodos();
-}
 
     </script>
 </body>
