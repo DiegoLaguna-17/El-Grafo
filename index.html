@@ -54,7 +54,7 @@
         <button id="importarDato" style="background-color: #004077;border-radius: 20vh;height: 10vh;width:20vh;color: white;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Importar Garfo</button>
         <input type="file" id="archivo" accept="application/json" style="display: none;">
         <!--klfdlksdflksflnsd-->
-        <button onclick="mostrarListaNodos()" style="background-color: orange; border-radius: 20vh; height: 10vh; width: 20vh;font-weight: bolder;">Eliminar Nodo</button>
+
         <div id="listaNodos" style="text-align: center; margin-top: 10px;"></div>
        
     </div>
@@ -145,6 +145,15 @@
                 circulo.setAttribute("cy", n.y);
                 circulo.setAttribute("r", 30);
                 circulo.setAttribute("class", "nodo");
+
+                // Evento para confirmar la eliminación con click izquierdo
+                circulo.addEventListener("click", () => {
+                    if (confirm(`¿Estas seguro de eliminar el nodo ${n.nombre}?`)) {
+                        eliminarNodo(n.id);
+                    }
+                });
+
+                // Evento para agregar arista con mouseup
                 circulo.addEventListener("mousedown", () => nodoElegido = n);
                 circulo.addEventListener("mouseup", (e) => {
                     if (nodoElegido && nodoElegido !== n) {
@@ -164,6 +173,7 @@
                 svg.appendChild(nombre);
             });
         }
+
         
 
         function dibujarArco(arc) {
@@ -174,6 +184,8 @@
             const diferenciax = haciaNodo.x - deNodo.x;
             const diferenciay = haciaNodo.y - deNodo.y;
             const distancia = Math.sqrt(diferenciax * diferenciax + diferenciay * diferenciay);
+
+
 
             const desplazamientoX = (diferenciax / distancia) * 90;
             const desplazamientoY = (diferenciay / distancia) * 90;
@@ -256,7 +268,7 @@
             arcos = [];
             c=1;
             generarMatriz();
-            mostrarListaNodos();
+
         });
 
 
@@ -314,18 +326,7 @@
         });
 
 
-        function mostrarListaNodos() {
-            const listaDiv = document.getElementById("listaNodos");
-            listaDiv.innerHTML = ""; // Limpiar la lista antes de mostrarla
-
-            nodos.forEach(nodo => {
-                const boton = document.createElement("button");
-                boton.textContent = `Eliminar Nodo ${nodo.id}`;
-                boton.style.margin = "5px";
-                boton.onclick = () => eliminarNodo(nodo.id);
-                listaDiv.appendChild(boton);
-            });
-        }
+        
 
 
         function eliminarNodo(id) {
@@ -338,7 +339,7 @@
             // Redibujar el grafo actualizado
             dibujarNodos();
             generarMatriz();
-            mostrarListaNodos();
+
         }
 
     </script>
