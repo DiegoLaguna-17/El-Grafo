@@ -237,50 +237,52 @@
             }
 
                 else{
-                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
 
-                const diferenciax = haciaNodo.x - deNodo.x;
-                const diferenciay = haciaNodo.y - deNodo.y;
-                const distancia = Math.sqrt(diferenciax * diferenciax + diferenciay * diferenciay);
+                    const diferenciax = haciaNodo.x - deNodo.x;
+                    const diferenciay = haciaNodo.y - deNodo.y;
+                    const distancia = Math.sqrt(diferenciax * diferenciax + diferenciay * diferenciay);
 
+                    // Definir un offset fijo para la curvatura del arco
+                    const offset = Math.max(30, distancia * 0.2); // Asegura que la curva siempre sea visible
 
+                    // Calcular el vector perpendicular para desplazar el punto de control
+                    const perpendicularX = (diferenciay / distancia) * offset;
+                    const perpendicularY = -(diferenciax / distancia) * offset;
 
-                const desplazamientoX = (diferenciax / distancia) * 90;
-                const desplazamientoY = (diferenciay / distancia) * 90;
+                    // Punto de control de la curva
+                    const controlCurvaX = (deNodo.x + haciaNodo.x) / 2 + perpendicularX;
+                    const controlCurvaY = (deNodo.y + haciaNodo.y) / 2 + perpendicularY;
 
-                const controlCurvaX = (deNodo.x + haciaNodo.x) / 2 - desplazamientoX;
-                const controlCurvaY = (deNodo.y + haciaNodo.y) / 2 + desplazamientoY;
+                    path.setAttribute("d", `M ${deNodo.x} ${deNodo.y} Q ${controlCurvaX} ${controlCurvaY} ${haciaNodo.x} ${haciaNodo.y}`);
+                    path.setAttribute("class", "arco");
+                    path.setAttribute("fill", "none");
 
-                path.setAttribute("d", `M ${deNodo.x} ${deNodo.y} Q ${controlCurvaX} ${controlCurvaY} ${haciaNodo.x} ${haciaNodo.y}`);
-                path.setAttribute("class", "arco");
-                path.setAttribute("fill", "none");
-                
-                if(diferenciax>0){
-                    path.setAttribute("stroke", "green");
-                }else{
-                    path.setAttribute("stroke", "red");
-                }
-                const peso = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                const medioX = (deNodo.x + haciaNodo.x) / 2;
-                const medioY = (deNodo.y + haciaNodo.y) / 2;
+                    // Definir Color
+                    if (diferenciax > 0) {
+                        path.setAttribute("stroke", "green");
+                    } else {
+                        path.setAttribute("stroke", "red");
+                    }
 
-                // Ajustar el texto del peso para que se sobreponga a la flecha
-                peso.setAttribute("x", controlCurvaX);
-                peso.setAttribute("y", controlCurvaY);
-                peso.setAttribute("class", "peso");
-                
-                peso.textContent = arc.valor;
+                    // Texto del peso
+                    const peso = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    peso.setAttribute("x", controlCurvaX);
+                    peso.setAttribute("y", controlCurvaY);
+                    peso.setAttribute("class", "peso");
+                    peso.textContent = arc.valor;
 
-                path.addEventListener("click", () => {
-                    const weight = prompt("Ingrese peso:", arc.valor);
-                    arc.valor = parseInt(weight) || 1;
-                    peso.textContent = arc.valor; // Actualizar el texto con el nuevo peso
-                    dibujarNodos();
-                });
-                
-                svg.appendChild(path);
-                svg.appendChild(peso);
-                generarMatriz();
+                    // Evento para modificar el peso del arco
+                    path.addEventListener("click", () => {
+                        const weight = prompt("Ingrese peso:", arc.valor);
+                        arc.valor = parseInt(weight) || 1;
+                        peso.textContent = arc.valor;
+                        dibujarNodos();
+                    });
+
+                    svg.appendChild(path);
+                    svg.appendChild(peso);
+                    generarMatriz();
             }
         }
 
