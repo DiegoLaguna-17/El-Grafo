@@ -7,14 +7,14 @@
     <style>
         body { font-family: Arial, sans-serif; user-select: none;background-color: rgb(187, 242, 139);}
         svg { border: 1vh solid black; width: 100%; height: 100%; }
-        .nodo { fill: blue; cursor: pointer; user-select: none; }
+        .nodo { cursor: pointer; user-select: none; }
         .arco{  stroke-width: 3.5; marker-end: url(#arrow); }
         .id { font-size: 2vh; fill: white; text-anchor: middle; dominant-baseline: middle; }
         .peso{font-size:4vh; fill: red; text-anchor: middle; dominant-baseline: middle; font-weight: bold;}
         .controls {  margin-top: 3vh; }
         
         .menu { position: absolute; background: white; border: 1px solid black; padding: 5px; display: none; }
-        .menu button { display: block; width: 100%; margin: 2px 0; }
+        .menu button, .menu input[type="color"] { display: block; width: 100%; margin: 2px 0; }
 
         table.matriz { border-collapse: collapse;margin: auto; width: 100%; text-align: center;font-size: 2vh;  }
         table.matriz th, table.matriz td { border: 1px solid black; width:fit-content;padding: 10px; }
@@ -62,6 +62,7 @@
     <div id="menu" class="menu">
         <button onclick="agregarBucle()">Agregar Bucle</button>
         <button onclick="cambiarNombre()">Cambiar nombre</button>
+        <input type="color" id="colorPicker" onchange="cambiarColor(this.value)">
         <button onclick="eliminarNodo()">Eliminar nodo</button>
         
     </div>
@@ -73,8 +74,6 @@
         // Menú de Edición de Nodos
         const menu = document.getElementById("menu");
         const svg = document.getElementById("canvas");
-        let  c=1;
-
 
         // Evita que se abra el menú del navegador
         // con el click derecho
@@ -88,10 +87,9 @@
             const rect = svg.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            const id = c;
+            const id = nodos.length + 1;
             if (nodos.length < 12){
-                c++;
-                nodos.push({ id, x, y, nombre: `Nodo ${id}` });
+                nodos.push({ id, x, y, nombre: `Nodo ${id}`, color: 'blue' });
                 dibujarNodos();
                 generarMatriz();
             }
@@ -142,11 +140,16 @@
             }
         }
 
-        
+        // Función para cambiar el color 
+        // del nodo
+        function cambiarColor(color) {
+            if (nodoEdicion) {
+                nodoEdicion.color = color;
+                dibujarNodos();
+            }
+        }
 
-        
-
-
+    
         function dibujarNodos() {
             svg.innerHTML = `
                 <defs>
@@ -162,7 +165,7 @@
                 circulo.setAttribute("cy", n.y);
                 circulo.setAttribute("r", 30);
                 circulo.setAttribute("class", "nodo");
-
+                circulo.setAttribute("fill", n.color || "blue");
                 
                 
                 // Evento para agregar arista con mouseup
