@@ -118,14 +118,12 @@
     <br>
     <center>
     <div class="controls" style="margin-top: 3vh;">
-        <button id="vaciarBtn" style="background-color: #004077;border-radius: 20vh;height: 10vh;width:20vh;color: white;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Nuevo grafo</button>
-        <button id="guardarGrafo" style="background-color: yellow;border-radius: 20vh;height: 10vh;width:20vh;color: black;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Guardar JSON</button>
-        <button id="importarDato" style="background-color: #004077;border-radius: 20vh;height: 10vh;width:20vh;color: white;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Importar Garfo</button>
+        <button id="btnVaciar" style="background-color: #004077;border-radius: 20vh;height: 10vh;width:20vh;color: white;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Vaciar Lienzo</button>
+        <button id="btnGuardarGrafo" style="background-color: yellow;border-radius: 20vh;height: 10vh;width:20vh;color: black;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Guardar JSON</button>
+        <button id="btnImportarGrafo" style="background-color: #004077;border-radius: 20vh;height: 10vh;width:20vh;color: white;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Importar Grafo</button>
         <input type="file" id="archivo" accept="application/json" style="display: none;">
-        
 
         <div id="listaNodos" style="text-align: center; margin-top: 10px;"></div>
-       
     </div>
 
     <div id="menu" class="menu">
@@ -133,73 +131,87 @@
         <button onclick="cambiarNombre()">Cambiar nombre</button>
         <input type="color" id="colorPicker" onchange="cambiarColor(this.value)">
         <button onclick="eliminarNodo()">Eliminar nodo</button>
-        
     </div>
 
 </center>
-
     <script>
-        let nodos = [], arcos = [], nodoElegido = null, nodoEdicion= null,nodoEliminar=null,nodoBucle=null;
-        // Menú de Edición de Nodos
+        let nodos = [], 
+            arcos = [], 
+            nodoElegido = null, 
+            nodoEdicion = null,
+            nodoEliminar = null,
+            nodoBucle = null;
+
         const menu = document.getElementById("menu");
         const svg = document.getElementById("canvas");
 
-        // Evita que se abra el menú del navegador
-        // con el click derecho
+    
+        const btnVaciar = document.getElementById("btnVaciar");
+        const btnGuardarGrafo = document.getElementById("btnGuardarGrafo");
+        const btnImportarGrafo = document.getElementById("btnImportarGrafo");
+
+
+        btnVaciar.addEventListener("click", vaciarCanvas);
+        btnGuardarGrafo.addEventListener("click", guardarGrafo);
+        btnImportarGrafo.addEventListener("click", abrirArchivo);
+
+
+        // Evita que se abra el menú del navegador con el click derecho
         svg.addEventListener("contextmenu", (e) => {
             e.preventDefault();
         });
+
+        svg.addEventListener("dblclick", (e) => posicionarNodo(e));
+
+        svg.addEventListener("contextmenu", (e) => mostrarMenuContextual(e));
         
-        // Obtener posición del nodo nuevo
-        // de forma dinámica (respecto al SVG)
-        svg.addEventListener("dblclick", (e) => {
-            const rect = svg.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const id = nodos.length + 1;
-            if (nodos.length < 12){
-                nodos.push({ id, x, y, nombre: `Nodo ${id}`, color: 'blue' });
-                dibujarNodos();
-                generarMatriz();
-            }
-            
-        });
-
-        // Ubicar y mostrar el menú
-        // para editar el nodo
-        svg.addEventListener("contextmenu", (e) => {
-            e.preventDefault();
-            const rect = svg.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            nodoEdicion = nodos.find(n => Math.hypot(n.x - x, n.y - y) < 100);
-            nodoEliminar= nodos.find(n => Math.hypot(n.x - x, n.y - y) < 100);
-            nodoBucle= nodos.find(n => Math.hypot(n.x - x, n.y - y) < 100);
-            if (nodoEdicion ||nodoEliminar) {
-                menu.style.left = `${e.clientX}px`;
-                menu.style.top = `${e.clientY}px`;
-                menu.style.display = "block";
-            } else {
-                menu.style.display = "none";
-            }
-
-            
-            
-        });
-        function agregarBucle(){
-            const nodoB=nodoBucle.id;
-            arcos.push({ de: nodoB, hacia: nodoB, valor: 1 });
-            dibujarNodos();
-        }
-        // Ocultar el menú cuando se hace
-        // click fuera del área del menú
+        // Ocultar el menú cuando se hace click fuera del área del menú
         document.addEventListener("click", () => {
             menu.style.display = "none";
         });
 
-        // Función para cambiar el nombre
-        // del nodo
+        // Posicionar las coordenadas de un nodo nuevo
+        function posicionarNodo(e) {
+            const rect = svg.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const id = nodos.length + 1;
+            if (nodos.length < 12) {
+                nodos.push({ id, x, y, nombre: `Nodo ${id}`, color: 'blue'});
+                dibujarNodos();
+                generarMatriz();
+            }
+        }
+
+        // Mostrar menú contextual
+        function mostrarMenuContextual(e) {
+            e.preventDefault();
+            const rect = svg.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            nodoEdicion = nodos.find(n => Math.hypot(n.x - x, n.y - y) < 100);
+            nodoEliminar = nodos.find(n => Math.hypot(n.x - x, n.y - y) < 100);
+            nodoBucle = nodos.find(n => Math.hypot(n.x - x, n.y - y) < 100);
+
+            if (nodoEdicion || nodoEliminar) {
+                menu.style.left = `${e.clientX}px`;
+                menu.style.top = `${e.clientY}px`;
+                menu.style.display = "block";
+            }
+            else {
+                menu.style.display = "none";
+            }
+        }
+
+        // Agregar un bucle a un nodo
+        function agregarBucle(){
+            const nodoB = nodoBucle.id;
+            arcos.push({ de: nodoB, hacia: nodoB, valor: 1 });
+            dibujarNodos();
+        }
+
+        // Cambiar el nombre de un nodo
         function cambiarNombre() {
             const nuevoNombre = prompt("Ingrese nuevo nombre:", nodoEdicion.nombre);
             if (nuevoNombre) {
@@ -209,8 +221,7 @@
             }
         }
 
-        // Función para cambiar el color 
-        // del nodo
+        // Cambiar el color de un nodo
         function cambiarColor(color) {
             if (nodoEdicion) {
                 nodoEdicion.color = color;
@@ -218,7 +229,16 @@
             }
         }
 
-    
+        // Eliminar un nodo
+        function eliminarNodo() {
+            const nodoE = nodoEliminar.id;
+            nodos = nodos.filter(n => n.id !== nodoE);
+            arcos = arcos.filter(arc => arc.de !== nodoE && arc.hacia !== nodoE);
+            dibujarNodos();
+            generarMatriz();
+        }
+
+        // Dibujar los nodos
         function dibujarNodos() {
             svg.innerHTML = `
                 <defs>
@@ -258,13 +278,12 @@
             });
         }
 
-        
-
+        // Dibujar los arcos
         function dibujarArco(arc) {
             const deNodo = nodos.find(n => n.id === arc.de);
             const haciaNodo = nodos.find(n => n.id === arc.hacia);
 
-            if(deNodo.id==haciaNodo.id){
+            if(deNodo.id == haciaNodo.id){
                 
                 const radioBucle = 40;
                 const x = deNodo.x;
@@ -273,11 +292,12 @@
                 
                 // Crear un arco usando un path
                 const loop= document.createElementNS("http://www.w3.org/2000/svg", "path");
-                if(x<500){
+                if (x < 500) {
                     loop.setAttribute("d", `M ${x-25} ${y+15} C ${x - 80} ${y }, ${x-40 } ${y - 80}, ${x-15} ${y - 15}`);
                     pesoText.setAttribute("x", x-35);
-                pesoText.setAttribute("y", y-10);
-                }else{
+                    pesoText.setAttribute("y", y-10);
+                } 
+                else {
                     loop.setAttribute("d", `M ${x+25} ${y+15} C ${x + 80} ${y }, ${x+30 } ${y - 80}, ${x+15} ${y - 15}`);
                     pesoText.setAttribute("x", x+35);
                     pesoText.setAttribute("y", y-10);
@@ -287,74 +307,71 @@
                 loop.setAttribute("fill", "none");
                 loop.setAttribute("class", "arco");
 
-                
                 pesoText.setAttribute("class", "peso");
                 pesoText.textContent = arc.valor;
 
                 loop.addEventListener("click", () => {
                     const weight = prompt("Ingrese peso:", arc.valor);
                     arc.valor = parseInt(weight) || 1;
-                    pesoText.textContent = arc.valor; // Actualizar el texto con el nuevo peso
+                    pesoText.textContent = arc.valor; 
                     dibujarNodos();
                 });
+
                 svg.appendChild(loop); 
                 svg.appendChild(pesoText);
-                generarMatriz();
-
-                    
-                    
+                generarMatriz();       
             } else {
 
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
 
-            const diferenciax = haciaNodo.x - deNodo.x;
-            const diferenciay = haciaNodo.y - deNodo.y;
-            const distancia = Math.sqrt(diferenciax * diferenciax + diferenciay * diferenciay);
+                const diferenciax = haciaNodo.x - deNodo.x;
+                const diferenciay = haciaNodo.y - deNodo.y;
+                const distancia = Math.sqrt(diferenciax * diferenciax + diferenciay * diferenciay);
 
-            // Definir un offset fijo para la curvatura del arco
-            const offset = Math.max(30, distancia * 0.2); // Asegura que la curva siempre sea visible
+                // Definir un offset fijo para la curvatura del arco
+                const offset = Math.max(30, distancia * 0.2); // Asegura que la curva siempre sea visible
 
-            // Calcular el vector perpendicular para desplazar el punto de control
-            const perpendicularX = (diferenciay / distancia) * offset;
-            const perpendicularY = -(diferenciax / distancia) * offset;
+                // Calcular el vector perpendicular para desplazar el punto de control
+                const perpendicularX = (diferenciay / distancia) * offset;
+                const perpendicularY = -(diferenciax / distancia) * offset;
 
-            // Punto de control de la curva
-            const controlCurvaX = (deNodo.x + haciaNodo.x) / 2 + perpendicularX;
-            const controlCurvaY = (deNodo.y + haciaNodo.y) / 2 + perpendicularY;
+                // Punto de control de la curva
+                const controlCurvaX = (deNodo.x + haciaNodo.x) / 2 + perpendicularX;
+                const controlCurvaY = (deNodo.y + haciaNodo.y) / 2 + perpendicularY;
 
-            path.setAttribute("d", `M ${deNodo.x} ${deNodo.y} Q ${controlCurvaX} ${controlCurvaY} ${haciaNodo.x} ${haciaNodo.y}`);
-            path.setAttribute("class", "arco");
-            path.setAttribute("fill", "none");
+                path.setAttribute("d", `M ${deNodo.x} ${deNodo.y} Q ${controlCurvaX} ${controlCurvaY} ${haciaNodo.x} ${haciaNodo.y}`);
+                path.setAttribute("class", "arco");
+                path.setAttribute("fill", "none");
 
-            // Definir Color
-            if (diferenciax > 0) {
-                path.setAttribute("stroke", "green");
-            } else {
-                path.setAttribute("stroke", "red");
-            }
+                // Definir Color
+                if (diferenciax > 0) {
+                    path.setAttribute("stroke", "green");
+                } else {
+                    path.setAttribute("stroke", "red");
+                }
 
-            // Texto del peso
-            const peso = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            peso.setAttribute("x", controlCurvaX);
-            peso.setAttribute("y", controlCurvaY);
-            peso.setAttribute("class", "peso");
-            peso.textContent = arc.valor;
-
-            // Evento para modificar el peso del arco
-            path.addEventListener("click", () => {
-                const weight = prompt("Ingrese peso:", arc.valor);
-                arc.valor = parseInt(weight) || 1;
+                // Texto del peso
+                const peso = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                peso.setAttribute("x", controlCurvaX);
+                peso.setAttribute("y", controlCurvaY);
+                peso.setAttribute("class", "peso");
                 peso.textContent = arc.valor;
-                dibujarNodos();
-            });
 
-            svg.appendChild(path);
-            svg.appendChild(peso);
-            generarMatriz();
+                // Evento para modificar el peso del arco
+                path.addEventListener("click", () => {
+                    const weight = prompt("Ingrese peso:", arc.valor);
+                    arc.valor = parseInt(weight) || 1;
+                    peso.textContent = arc.valor;
+                    dibujarNodos();
+                });
+
+                svg.appendChild(path);
+                svg.appendChild(peso);
+                generarMatriz();
             }
         }
 
-
+        // Generar matriz de adyacencia
         function generarMatriz() {
             let tamaño = nodos.length;
             let matriz = Array(tamaño + 1).fill().map(() => Array(tamaño + 1).fill("0"));
@@ -363,9 +380,7 @@
             nodos.forEach((n, i) => {
                 matriz[0][i + 1] =  n.nombre;
                 matriz[i + 1][0] =  n.nombre;
-                
             });
-
 
             arcos.forEach(e => {
                 let origen = nodos.findIndex(n => n.id === e.de) + 1;
@@ -385,41 +400,32 @@
                 tabla.appendChild(tr);
             });
 
-            if(nodos.length>7){
+            if(nodos.length > 7){
                 document.getElementById("tablaMatriz").style="font-size:1vh;padding:1px";
             }
         }
 
-        const vaciarBtn = document.getElementById("vaciarBtn");
-
-        // Selecciona el contenedor del SVG
-
-        // Agregar el evento click al botón de vaciar
-        vaciarBtn.addEventListener("click", function() {
-            // Vacia el contenido del SVG
+        // Función para vaciar el SVG
+        function vaciarCanvas() {
             svg.innerHTML = "";
-            
-            // También puedes resetear cualquier otra variable que esté almacenando los nodos o vértices
             nodos = [];
             arcos = [];
-            c=1;
             generarMatriz();
-
-        });
-
-
-        document.getElementById("guardarGrafo").addEventListener("click",function(){
-            let nom="";
+        }
+        
+        // Función para guardar el grafo en JSON
+        function guardarGrafo() {
+            let nom = "";
             const nombreArchivo = prompt("Ingrese el nombre que sea para el archivo:", nom);
-            if(!nombreArchivo){
-                return;
-            }
+
+            if (!nombreArchivo) return;
+
             const datos={
                 nodosJ:nodos,
                 arcosJ:arcos
             };
             const jsonString = JSON.stringify(datos, null, 2);
-        
+
             // Crear un Blob con el JSON
             const blob = new Blob([jsonString], { type: "application/json" });
             const link = document.createElement("a");
@@ -429,16 +435,17 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        });
+        }
 
+        // Abrir el explorador de archivos
+        function abrirArchivo() {
+            const archivo = document.getElementById("archivo");
+            archivo.click();
+            archivo.addEventListener("change", manejarArchivoJSON, { once : true });
+        }
 
-        document.getElementById("importarDato").addEventListener("click", function () {
-            // Abrir el explorador de archivos
-            document.getElementById("archivo").click();
-        });
-
-
-        document.getElementById("archivo").addEventListener("change", function (event) {
+        // Manejar el archivo JSON
+        function manejarArchivoJSON(event) {
             const file = event.target.files[0]; // Obtener el archivo seleccionado
             if (!file) return;
 
@@ -452,6 +459,7 @@
                     dibujarNodos();
                     generarMatriz();
                     alert("Archivo importado correctamente.");
+                    event.target.value = "";
                 } catch (error) {
                     alert("Error al leer el archivo JSON.");
                     console.error(error);
@@ -459,23 +467,6 @@
             };
 
             reader.readAsText(file); // Leer archivo como texto
-        });
-
-
-
-        function eliminarNodo() {
-            
-            // Filtrar la lista de nodos para eliminar el nodo seleccionado
-                const nodoE=nodoEliminar.id;
-                nodos = nodos.filter(n => n.id !== nodoE);
-
-                // Filtrar la lista de arcos para eliminar aquellos relacionados con el nodo
-                arcos = arcos.filter(arc => arc.de !== nodoE && arc.hacia !== nodoE);
-
-                // Redibujar el grafo actualizado
-                dibujarNodos();
-                generarMatriz();
-
         }
 
     </script>
