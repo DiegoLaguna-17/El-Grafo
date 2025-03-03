@@ -3,504 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/estiloPrincipal.css">
+    <link rel="stylesheet" href="css/styles.css">
     <title>Editor de Grafos</title>
-    <style>
-        
-        svg { border: 1vh solid black; width: 100%; height: 100%; }
-        .nodo { cursor: pointer; user-select: none; }
-        .arco{  stroke-width: 3.5; marker-end: url(#arrow); }
-        .id { font-size: 2vh; fill: white; text-anchor: middle; dominant-baseline: middle; }
-        .peso{font-size:4vh; fill: red; text-anchor: middle; dominant-baseline: middle; font-weight: bold;}
-        .controls {  margin-top: 3vh; }
-        
-        .menu { position: absolute; background: white; border: 1px solid black; padding: 5px; }
-        .menu button, .menu input[type="color"] { display: block; width: 100%; margin: 2px 0; }
-
-        table.matriz { border-collapse: collapse;margin: auto; width: 100%; text-align: center;font-size: 2vh;  }
-        table.matriz th, table.matriz td { border: 1px solid black; width:fit-content;padding: 10px; }
-    </style>
 </head>
-
 <body>
+    <div class="container">
+        <!-- Menu Button -->
+        <button id="menuButton" class="menu-button">☰ Menú</button>
 
-    <div class="contenedorPrincipal">
-        <!-- INICIO del menu -->
-        <div class="contenedorMenu">
-            <div class="menuPrincipal">
-                <div class="menu-header">
-                    <div>
-                        <h2>EL GRAFO</h2>
-                    </div>
-                    <div>
-                        <img src="imagenes/logoAlgoritmo.png" alt="logoAlgoritmo" width="80%" height="80%">
-                    </div>
-                    <div>
-                        <a href="#"><img src="imagenes/logoVideo.png" alt="logo ver video" width="80px" height="70px"></a>
-                        <a href="#"><img src="imagenes/logoDescargar.png" alt="logo descargar" width="100px" height="70px" ></a>
-                    </div>
-                </div>
-                <div class="menu-scroll">
-                    <ul>
-                        <a href="#"><li>Json</li></a>
-                        <a href="#"><li>Asignación</li></a>
-                        <a href="#"><li>Opción 3</li></a>
-                        <a href="#"><li>Opción 3</li></a>
-                        <a href="#"><li>Opción 3</li></a>
-                        <a href="#"><li>Opción 3</li></a>
-                        <a href="#"><li>Opción 3</li></a>
-                        <a href="#"><li>Opción 3</li></a>
-                        <a href="#"><li>Opción 3</li></a>
-                    </ul>
-                </div>
+        <!-- Collapsible Sidebar -->
+        <div id="sidebar" class="sidebar">
+            <!-- Part 1: Title with Icon -->
+            <div class="settings-header">
+                <h2>EL GRAFO</h2>
+                <img src="media/logoAlgoritmo.png" alt="Icono" class="settings-icon">
             </div>
-            <script src="scripts/script.js"></script>
+
+            <!-- Part 2: Buttons for Tutorial and PDF -->
+            <div class="settings-buttons">
+                <a href="#" class="settings-button">
+                    <img src="media/logoVideo.png" alt="Ver video" class="button-icon">
+                </a>
+                <a href="#" class="settings-button">
+                    <img src="media/logoDescargar.png" alt="Descargar PDF" class="button-icon">
+                </a>
+            </div>
+
+            <!-- Part 3: Scrollable Menu -->
+            <div class="settings-menu">
+                <ul>
+                    <li><a href="#">Json</a></li>
+                    <li><a href="#">Asignación</a></li>
+                    <li><a href="#">Opción 3</a></li>
+                    <!-- Add more options as needed -->
+                </ul>
+            </div>
         </div>
-        <!-- FIN del menu -->
 
-        <!-- INICIO grafo -->
-        <div class="contenedorGrafo">
-            <div style="height: 80vh; width: 100.5%;">
-                <table border=0 style="width: 100%; height: 100%; max-height: 80vh;">
-                    <tr>
-                        <td style="width: 60%;">
-                            <svg id="canvas" style="width: 99%;background-color: #A4F5A6;max-height: 100%;">
-                                <defs>
-                                    <marker id="arrow" markerWidth="5" markerHeight="5" refX="15" refY="5" orient="auto" markerUnits="strokeWidth">
-                                        
-                                    </marker>
-                                </defs>
-                            </svg>
-                        </td>
-                        <td style="width: 40%;padding:2vh ;">
-                            <center>
-                                <h1 style="color: #ffffff">Matriz de adyacencia
-                                </h1>
-                                <table id="tablaMatriz" class="matriz" style="color: #ffffff;"></table>
-                            </center>
-                        </td>
-                    </tr>
-            </table>    
-            </div>
-            <br>
-            <center>
-            <div class="controls" style="margin-top: 3vh;">
-                <button id="vaciarBtn" style="background-color: #B2A1FF;border-radius: 20vh;height: 10vh;width:20vh;color: #222222;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Nuevo grafo</button>
-                <button id="guardarGrafo" style="background-color: #B2A1FF;border-radius: 20vh;height: 10vh;width:20vh;color: #222222;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Guardar JSON</button>
-                <button id="importarDato" style="background-color: #B2A1FF;border-radius: 20vh;height: 10vh;width:20vh;color: #222222;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Importar Garfo</button>
+        <!-- Column SVG -->
+        <div class="column-svg">
+            <!-- Part 1: Control Buttons -->
+            <div class="controls">
+                <button id="vaciarBtn">Nuevo grafo</button>
+                <button id="guardarGrafo">Guardar JSON</button>
+                <button id="importarDato">Importar Grafo</button>
                 <input type="file" id="archivo" accept="application/json" style="display: none;">
-                
-        
-                <div id="listaNodos" style="text-align: center; margin-top: 10px;"></div>
-               
             </div>
-        
-            <div id="menu" class="menu">
-                <button onclick="agregarBucle()">Agregar Bucle</button>
-                <button onclick="cambiarNombre()">Cambiar nombre</button>
-                <input type="color" id="colorPicker" onchange="cambiarColor(this.value)">
-                <button onclick="eliminarNodo()">Eliminar nodo</button>
-                
+
+            <!-- Part 2: SVG Canvas -->
+            <div class="svg-container">
+                <svg id="canvas"></svg>
             </div>
-        
-            </center>
+
+            <!-- Part 3: Matriz de Adyacencia -->
+            <div class="matriz-container">
+                <h1>Matriz de adyacencia</h1>
+                <div class="matriz-scroll">
+                    <table id="tablaMatriz" class="matriz"></table>
+                </div>
+            </div>
         </div>
     </div>
 
-    
-
-
-<header>
-    <div class="logo-container">
-        <img src="algorithm_8616578.png" alt="Logo">
-        <h3>ANÁLISIS DE ALGORITMOS</h3>
-    </div>
-    <nav>
-        <ul>
-            <li><a href="ayuda.html">Ayuda</a></li>
-        </ul>
-    </nav>
-</header>
-<body>
-    <div style="width: 98%;height: 10%;">
-        <center><h1 style="font-family: Verdana, Geneva, Tahoma, sans-serif;">Editor de grafos de Silk Road</h1></center>
-    </div>
-    <div style="height: 80vh; width: 100.5%;">
-        <table border=0 style="width: 100%; height: 100%; max-height: 80vh;">
-            <tr>
-                <td style="width: 60%;">
-                    <svg id="canvas" style="width: 99%;background-color: antiquewhite;max-height: 100%;">
-                        <defs>
-                            <marker id="arrow" markerWidth="5" markerHeight="5" refX="15" refY="5" orient="auto" markerUnits="strokeWidth">
-                                
-                            </marker>
-                        </defs>
-                    </svg>
-                </td>
-                <td style="width: 40%;padding:2vh ;">
-                    <center>
-                        <h1>Matriz de adyacencia
-                        </h1>
-                        <table id="tablaMatriz" class="matriz"></table>
-                    </center>
-                </td>
-            </tr>
-    </table>    
-    </div>
-    <br>
-    <center>
-    <div class="controls" style="margin-top: 3vh;">
-        <button id="btnVaciar" style="background-color: #004077;border-radius: 20vh;height: 10vh;width:20vh;color: white;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Vaciar Lienzo</button>
-        <button id="btnGuardarGrafo" style="background-color: yellow;border-radius: 20vh;height: 10vh;width:20vh;color: black;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Guardar JSON</button>
-        <button id="btnImportarGrafo" style="background-color: #004077;border-radius: 20vh;height: 10vh;width:20vh;color: white;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Importar Grafo</button>
-        <input type="file" id="archivo" accept="application/json" style="display: none;">
-
-        <div id="listaNodos" style="text-align: center; margin-top: 10px;"></div>
-    </div>
-
-    <div id="menu" class="menu">
-        <button onclick="agregarBucle()">Agregar Bucle</button>
-        <button onclick="cambiarNombre()">Cambiar nombre</button>
-        <input type="color" id="colorPicker" onchange="cambiarColor(this.value)">
-        <button onclick="eliminarNodo()">Eliminar nodo</button>
-    </div>
-
-</center>
+    <script src="js/sideBarMenu.js"></script>
+    <script src="js/script.js"></script>
     <script>
-        let nodos = [], 
-            arcos = [], 
-            nodoElegido = null, 
-            nodoEdicion = null,
-            nodoEliminar = null,
-            nodoBucle = null;
+        // Toggle Sidebar
+        const menuButton = document.getElementById("menuButton");
+        const sidebar = document.getElementById("sidebar");
 
-        const menu = document.getElementById("menu");
-        const svg = document.getElementById("canvas");
-
-    
-        const btnVaciar = document.getElementById("btnVaciar");
-        const btnGuardarGrafo = document.getElementById("btnGuardarGrafo");
-        const btnImportarGrafo = document.getElementById("btnImportarGrafo");
-
-
-        btnVaciar.addEventListener("click", vaciarCanvas);
-        btnGuardarGrafo.addEventListener("click", guardarGrafo);
-        btnImportarGrafo.addEventListener("click", abrirArchivo);
-
-
-        // Evita que se abra el menú del navegador con el click derecho
-        svg.addEventListener("contextmenu", (e) => {
-            e.preventDefault();
+        menuButton.addEventListener("click", () => {
+            sidebar.classList.toggle("active");
         });
-
-        svg.addEventListener("dblclick", (e) => posicionarNodo(e));
-
-        svg.addEventListener("contextmenu", (e) => mostrarMenuContextual(e));
-        
-        // Ocultar el menú cuando se hace click fuera del área del menú
-        document.addEventListener("click", () => {
-            menu.style.display = "none";
-        });
-
-        // Posicionar las coordenadas de un nodo nuevo
-        function posicionarNodo(e) {
-            const rect = svg.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const id = nodos.length + 1;
-            if (nodos.length < 12) {
-                nodos.push({ id, x, y, nombre: `Nodo ${id}`, color: 'blue'});
-                dibujarNodos();
-                generarMatriz();
-            }
-        }
-
-        // Mostrar menú contextual
-        function mostrarMenuContextual(e) {
-            e.preventDefault();
-            const rect = svg.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            nodoEdicion = nodos.find(n => Math.hypot(n.x - x, n.y - y) < 100);
-            nodoEliminar = nodos.find(n => Math.hypot(n.x - x, n.y - y) < 100);
-            nodoBucle = nodos.find(n => Math.hypot(n.x - x, n.y - y) < 100);
-
-            if (nodoEdicion || nodoEliminar) {
-                menu.style.left = `${e.clientX}px`;
-                menu.style.top = `${e.clientY}px`;
-                menu.style.display = "block";
-            }
-            else {
-                menu.style.display = "none";
-            }
-        }
-
-        // Agregar un bucle a un nodo
-        function agregarBucle(){
-            const nodoB = nodoBucle.id;
-            arcos.push({ de: nodoB, hacia: nodoB, valor: 1 });
-            dibujarNodos();
-        }
-
-        // Cambiar el nombre de un nodo
-        function cambiarNombre() {
-            const nuevoNombre = prompt("Ingrese nuevo nombre:", nodoEdicion.nombre);
-            if (nuevoNombre) {
-                nodoEdicion.nombre = nuevoNombre;
-                dibujarNodos();
-                generarMatriz();
-            }
-        }
-
-        // Cambiar el color de un nodo
-        function cambiarColor(color) {
-            if (nodoEdicion) {
-                nodoEdicion.color = color;
-                dibujarNodos();
-            }
-        }
-
-        // Eliminar un nodo
-        function eliminarNodo() {
-            const nodoE = nodoEliminar.id;
-            nodos = nodos.filter(n => n.id !== nodoE);
-            arcos = arcos.filter(arc => arc.de !== nodoE && arc.hacia !== nodoE);
-            dibujarNodos();
-            generarMatriz();
-        }
-
-        // Dibujar los nodos
-        function dibujarNodos() {
-            svg.innerHTML = `
-                <defs>
-                    <marker id="arrow" markerWidth="15" markerHeight="10" refX="15" refY="5" orient="auto" markerUnits="strokeWidth">
-                        <path d="M0,0 L0,10 L15,5 Z"  />
-                    </marker>
-                </defs>`;
-                
-            arcos.forEach(dibujarArco);
-            nodos.forEach(n => {
-                const circulo = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                circulo.setAttribute("cx", n.x);
-                circulo.setAttribute("cy", n.y);
-                circulo.setAttribute("r", 30);
-                circulo.setAttribute("class", "nodo");
-                circulo.setAttribute("fill", n.color || "blue");
-                
-                
-                // Evento para agregar arista con mouseup
-                circulo.addEventListener("mousedown", () => nodoElegido = n);
-                circulo.addEventListener("mouseup", (e) => {
-                    if (nodoElegido && nodoElegido !== n) {
-                        arcos.push({ de: nodoElegido.id, hacia: n.id, valor: 1 });
-                        dibujarNodos();
-                    }
-                    nodoElegido = null;
-                });
-
-                const nombre = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                nombre.setAttribute("x", n.x);
-                nombre.setAttribute("y", n.y);
-                nombre.setAttribute("class", "id");
-                nombre.textContent = n.nombre;
-                
-                svg.appendChild(circulo);
-                svg.appendChild(nombre);
-            });
-        }
-
-        // Dibujar los arcos
-        function dibujarArco(arc) {
-            const deNodo = nodos.find(n => n.id === arc.de);
-            const haciaNodo = nodos.find(n => n.id === arc.hacia);
-
-            if(deNodo.id == haciaNodo.id){
-                
-                const radioBucle = 40;
-                const x = deNodo.x;
-                const y = deNodo.y;
-                const pesoText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                
-                // Crear un arco usando un path
-                const loop= document.createElementNS("http://www.w3.org/2000/svg", "path");
-                if (x < 500) {
-                    loop.setAttribute("d", `M ${x-25} ${y+15} C ${x - 80} ${y }, ${x-40 } ${y - 80}, ${x-15} ${y - 15}`);
-                    pesoText.setAttribute("x", x-35);
-                    pesoText.setAttribute("y", y-10);
-                } 
-                else {
-                    loop.setAttribute("d", `M ${x+25} ${y+15} C ${x + 80} ${y }, ${x+30 } ${y - 80}, ${x+15} ${y - 15}`);
-                    pesoText.setAttribute("x", x+35);
-                    pesoText.setAttribute("y", y-10);
-                }
-                loop.setAttribute("stroke", "aqua");
-                loop.setAttribute("stroke-width", "1.5");
-                loop.setAttribute("fill", "none");
-                loop.setAttribute("class", "arco");
-
-                pesoText.setAttribute("class", "peso");
-                pesoText.textContent = arc.valor;
-
-                loop.addEventListener("click", () => {
-                    const weight = prompt("Ingrese peso:", arc.valor);
-                    arc.valor = parseInt(weight) || 1;
-                    pesoText.textContent = arc.valor; 
-                    dibujarNodos();
-                });
-
-                svg.appendChild(loop); 
-                svg.appendChild(pesoText);
-                generarMatriz();       
-            } else {
-
-                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-
-                const diferenciax = haciaNodo.x - deNodo.x;
-                const diferenciay = haciaNodo.y - deNodo.y;
-                const distancia = Math.sqrt(diferenciax * diferenciax + diferenciay * diferenciay);
-
-                // Definir un offset fijo para la curvatura del arco
-                const offset = Math.max(30, distancia * 0.2); // Asegura que la curva siempre sea visible
-
-                // Calcular el vector perpendicular para desplazar el punto de control
-                const perpendicularX = (diferenciay / distancia) * offset;
-                const perpendicularY = -(diferenciax / distancia) * offset;
-
-                // Punto de control de la curva
-                const controlCurvaX = (deNodo.x + haciaNodo.x) / 2 + perpendicularX;
-                const controlCurvaY = (deNodo.y + haciaNodo.y) / 2 + perpendicularY;
-
-                path.setAttribute("d", `M ${deNodo.x} ${deNodo.y} Q ${controlCurvaX} ${controlCurvaY} ${haciaNodo.x} ${haciaNodo.y}`);
-                path.setAttribute("class", "arco");
-                path.setAttribute("fill", "none");
-
-                // Definir Color
-                if (diferenciax > 0) {
-                    path.setAttribute("stroke", "green");
-                } else {
-                    path.setAttribute("stroke", "red");
-                }
-
-                // Texto del peso
-                const peso = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                peso.setAttribute("x", controlCurvaX);
-                peso.setAttribute("y", controlCurvaY);
-                peso.setAttribute("class", "peso");
-                peso.textContent = arc.valor;
-
-                // Evento para modificar el peso del arco
-                path.addEventListener("click", () => {
-                    const weight = prompt("Ingrese peso:", arc.valor);
-                    arc.valor = parseInt(weight) || 1;
-                    peso.textContent = arc.valor;
-                    dibujarNodos();
-                });
-
-                svg.appendChild(path);
-                svg.appendChild(peso);
-                generarMatriz();
-            }
-        }
-
-        // Generar matriz de adyacencia
-        function generarMatriz() {
-            let tamaño = nodos.length;
-            let matriz = Array(tamaño + 1).fill().map(() => Array(tamaño + 1).fill("0"));
-
-            matriz[0][0] = " ";
-            nodos.forEach((n, i) => {
-                matriz[0][i + 1] =  n.nombre;
-                matriz[i + 1][0] =  n.nombre;
-            });
-
-            arcos.forEach(e => {
-                let origen = nodos.findIndex(n => n.id === e.de) + 1;
-                let destino = nodos.findIndex(n => n.id === e.hacia) + 1;
-                matriz[origen][destino] = e.valor;
-            });
-
-            let tabla = document.getElementById("tablaMatriz");
-            tabla.innerHTML = "";
-            matriz.forEach(fila => {
-                let tr = document.createElement("tr");
-                fila.forEach(celda => {
-                    let td = document.createElement(tr.children.length ? "td" : "th");
-                    td.textContent = celda;
-                    tr.appendChild(td);
-                });
-                tabla.appendChild(tr);
-            });
-
-            if(nodos.length > 7){
-                document.getElementById("tablaMatriz").style="font-size:1vh;padding:1px";
-            }
-        }
-
-        // Función para vaciar el SVG
-        function vaciarCanvas() {
-            svg.innerHTML = "";
-            nodos = [];
-            arcos = [];
-            generarMatriz();
-        }
-        
-        // Función para guardar el grafo en JSON
-        function guardarGrafo() {
-            let nom = "";
-            const nombreArchivo = prompt("Ingrese el nombre que sea para el archivo:", nom);
-
-            if (!nombreArchivo) return;
-
-            const datos={
-                nodosJ:nodos,
-                arcosJ:arcos
-            };
-            const jsonString = JSON.stringify(datos, null, 2);
-
-            // Crear un Blob con el JSON
-            const blob = new Blob([jsonString], { type: "application/json" });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = nombreArchivo+".json";
-
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Abrir el explorador de archivos
-        function abrirArchivo() {
-            const archivo = document.getElementById("archivo");
-            archivo.click();
-            archivo.addEventListener("change", manejarArchivoJSON, { once : true });
-        }
-
-        // Manejar el archivo JSON
-        function manejarArchivoJSON(event) {
-            const file = event.target.files[0]; // Obtener el archivo seleccionado
-            if (!file) return;
-
-            const reader = new FileReader(); // Crear lector de archivos
-
-            reader.onload = function (e) {
-                try {
-                    const jsonData = JSON.parse(e.target.result); // Convertir JSON a objeto JS
-                    nodos = jsonData.nodosJ || [];
-                    arcos = jsonData.arcosJ || [];
-                    dibujarNodos();
-                    generarMatriz();
-                    alert("Archivo importado correctamente.");
-                    event.target.value = "";
-                } catch (error) {
-                    alert("Error al leer el archivo JSON.");
-                    console.error(error);
-                }
-            };
-
-            reader.readAsText(file); // Leer archivo como texto
-        }
-
     </script>
 </body>
 </html>
