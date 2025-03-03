@@ -65,8 +65,19 @@
         </div>
     </div>
 
+    <!-- Context Menu -->
+    <div id="menu" class="menu">
+        <button id="agregarBucleBtn">Agregar Bucle</button>
+        <button id="cambiarNombreBtn">Cambiar nombre</button>
+        <input type="color" id="colorPicker">
+        <button id="eliminarNodoBtn">Eliminar nodo</button>
+    </div>
+
+    <!-- Include app.js as a module -->
+    <script type="module" src="js/app.js"></script>
     <script src="js/sideBarMenu.js"></script>
-    <script src="js/script.js"></script>
+
+
     <script>
         // Toggle Sidebar
         const menuButton = document.getElementById("menuButton");
@@ -76,5 +87,6 @@
             sidebar.classList.toggle("active");
         });
     </script>
+
 </body>
 </html>

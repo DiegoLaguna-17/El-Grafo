@@ -17,6 +17,7 @@ body {
 
 /* Container for Columns */
 .container {
+    user-select: none;
     display: flex;
     width: 100%;
     min-height: 100vh; /* Allow container to grow with content */
@@ -190,4 +191,41 @@ svg {
 .matriz th, .matriz td {
     border: 1px solid white;
     padding: 10px;
+}
+
+
+#menu {
+    display: none; 
+    position: absolute; 
+    background-color: #222222; 
+    border: 1px solid #444444; 
+    border-radius: 8px; 
+    padding: 10px; 
+    z-index: 1000; 
+}
+
+#menu button,
+#menu input[type="color"] {
+    display: block; 
+    width: 100%; 
+    padding: 10px; 
+    margin: 5px 0;
+    background-color: #333333; 
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    font-family: Verdana, Geneva, Tahoma, sans-serif; 
+    font-size: 14px; 
+    cursor: pointer; 
+    transition: background-color 0.3s;
+}
+
+#menu button:hover,
+#menu input[type="color"]:hover {
+    background-color: #444444; 
+}
+
+#menu input[type="color"] {
+    padding: 5px;
+    height: 40px; 
 }
