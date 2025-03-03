@@ -32,12 +32,7 @@ export default class Grafo {
     }
 
     dibujarGrafo() {
-        this.svg.innerHTML = `
-            <defs>
-                <marker id="arrow" markerWidth="15" markerHeight="10" refX="15" refY="5" orient="auto" markerUnits="strokeWidth">
-                    <path d="M0,0 L0,10 L15,5 Z" />
-                </marker>
-            </defs>`;
+        this.svg.innerHTML = ''; 
         this.arcos.forEach(arco => this.dibujarArco(arco));
         this.nodos.forEach(nodo => this.dibujarNodo(nodo));
         this.generarMatriz();
@@ -51,7 +46,6 @@ export default class Grafo {
         circulo.setAttribute("class", "nodo");
         circulo.setAttribute("fill", nodo.color || "blue");
 
-        // Event listeners for edge creation
         circulo.addEventListener("mousedown", () => this.nodoElegido = nodo);
         circulo.addEventListener("mouseup", (e) => {
             if (this.nodoElegido && this.nodoElegido !== nodo) {
@@ -73,12 +67,26 @@ export default class Grafo {
         this.svg.appendChild(nombre);
     }
 
+    dibujarFlecha(x, y, angulo) {
+        const tamañoFlecha = 10; 
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    
+        const x1 = x - tamañoFlecha * Math.cos(angulo - Math.PI / 6);
+        const y1 = y - tamañoFlecha * Math.sin(angulo - Math.PI / 6);
+        const x2 = x - tamañoFlecha * Math.cos(angulo + Math.PI / 6);
+        const y2 = y - tamañoFlecha * Math.sin(angulo + Math.PI / 6);
+    
+        path.setAttribute("d", `M ${x} ${y} L ${x1} ${y1} L ${x2} ${y2} Z`);
+        path.setAttribute("fill", "black"); 
+        this.svg.appendChild(path);
+    }
+
     dibujarArco(arco) {
         const deNodo = this.nodos.find(n => n.id === arco.de);
         const haciaNodo = this.nodos.find(n => n.id === arco.hacia);
-
+    
         if (deNodo.id === haciaNodo.id) {
-            // Draw a loop
+            // Bucle
             const loop = document.createElementNS("http://www.w3.org/2000/svg", "path");
             const x = deNodo.x;
             const y = deNodo.y;
@@ -91,24 +99,24 @@ export default class Grafo {
             loop.setAttribute("stroke-width", "1.5");
             loop.setAttribute("fill", "none");
             loop.setAttribute("class", "arco");
-
+    
             const pesoText = document.createElementNS("http://www.w3.org/2000/svg", "text");
             pesoText.setAttribute("x", x < 500 ? x - 35 : x + 35);
             pesoText.setAttribute("y", y - 10);
             pesoText.setAttribute("class", "peso");
             pesoText.textContent = arco.valor;
-
+    
             loop.addEventListener("click", () => {
                 const weight = prompt("Ingrese peso:", arco.valor);
                 arco.valor = parseInt(weight) || 1;
                 pesoText.textContent = arco.valor;
                 this.dibujarGrafo();
             });
-
+    
             this.svg.appendChild(loop);
             this.svg.appendChild(pesoText);
         } else {
-            // Draw a curved edge
+            // Arco curveado
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
             const diferenciax = haciaNodo.x - deNodo.x;
             const diferenciay = haciaNodo.y - deNodo.y;
@@ -118,26 +126,40 @@ export default class Grafo {
             const perpendicularY = -(diferenciax / distancia) * offset;
             const controlCurvaX = (deNodo.x + haciaNodo.x) / 2 + perpendicularX;
             const controlCurvaY = (deNodo.y + haciaNodo.y) / 2 + perpendicularY;
-
+    
             path.setAttribute("d", `M ${deNodo.x} ${deNodo.y} Q ${controlCurvaX} ${controlCurvaY} ${haciaNodo.x} ${haciaNodo.y}`);
             path.setAttribute("class", "arco");
             path.setAttribute("fill", "none");
             path.setAttribute("stroke", diferenciax > 0 ? "green" : "red");
-
+    
+            this.svg.appendChild(path); 
+    
+            const radio = 30; 
+            const minDistance = radio * 1.3; 
+            const t = Math.max(0.85, 1 - (minDistance / distancia)); 
+            
+            const arrowX = Math.pow(1 - t, 2) * deNodo.x + 2 * (1 - t) * t * controlCurvaX + Math.pow(t, 2) * haciaNodo.x;
+            const arrowY = Math.pow(1 - t, 2) * deNodo.y + 2 * (1 - t) * t * controlCurvaY + Math.pow(t, 2) * haciaNodo.y;
+    
+            const tangentX = 2 * (1 - t) * (controlCurvaX - deNodo.x) + 2 * t * (haciaNodo.x - controlCurvaX);
+            const tangentY = 2 * (1 - t) * (controlCurvaY - deNodo.y) + 2 * t * (haciaNodo.y - controlCurvaY);
+            const tangentAngle = Math.atan2(tangentY, tangentX);
+    
+            this.dibujarFlecha(arrowX, arrowY, tangentAngle);
+    
             const peso = document.createElementNS("http://www.w3.org/2000/svg", "text");
             peso.setAttribute("x", controlCurvaX);
             peso.setAttribute("y", controlCurvaY);
             peso.setAttribute("class", "peso");
             peso.textContent = arco.valor;
-
+    
             path.addEventListener("click", () => {
                 const weight = prompt("Ingrese peso:", arco.valor);
                 arco.valor = parseInt(weight) || 1;
                 peso.textContent = arco.valor;
                 this.dibujarGrafo();
             });
-
-            this.svg.appendChild(path);
+    
             this.svg.appendChild(peso);
         }
     }
