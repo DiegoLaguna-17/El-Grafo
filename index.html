@@ -3,67 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/estiloPrincipal.css">
     <title>Editor de Grafos</title>
     <style>
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            background-color: #5D8736;
-            color: white;
-            padding: 15px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 10;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .logo-container img {
-            width: 40px;
-            height: 40px;
-            margin-right: 10px;
-        }
-
-        .logo-container h3 {
-            margin: 0;
-            font-size: 25px;
-            font-family: Soleil;
-        }
-
-        nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        nav ul li {
-            display: inline;
-            margin: 0 15px;
-        }
-
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-size: 17px;
-            padding: 10px 15px;
-            transition: background-color 0.3s, color 0.3s;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        nav ul li a:hover {
-            background-color: #C84C05;
-            color: whitesmoke;
-            border-radius: 5px;
-            text-decoration: underline;
-            text-decoration-color: black;
-        }
-        body { font-family: Arial, sans-serif; user-select: none;background-color: rgb(187, 242, 139);}
+        
         svg { border: 1vh solid black; width: 100%; height: 100%; }
         .nodo { cursor: pointer; user-select: none; }
         .arco{  stroke-width: 3.5; marker-end: url(#arrow); }
@@ -71,13 +14,102 @@
         .peso{font-size:4vh; fill: red; text-anchor: middle; dominant-baseline: middle; font-weight: bold;}
         .controls {  margin-top: 3vh; }
         
-        .menu { position: absolute; background: white; border: 1px solid black; padding: 5px; display: none; }
+        .menu { position: absolute; background: white; border: 1px solid black; padding: 5px; }
         .menu button, .menu input[type="color"] { display: block; width: 100%; margin: 2px 0; }
 
         table.matriz { border-collapse: collapse;margin: auto; width: 100%; text-align: center;font-size: 2vh;  }
         table.matriz th, table.matriz td { border: 1px solid black; width:fit-content;padding: 10px; }
     </style>
 </head>
+
+<body>
+
+    <div class="contenedorPrincipal">
+        <!-- INICIO del menu -->
+        <div class="contenedorMenu">
+            <div class="menuPrincipal">
+                <div class="menu-header">
+                    <div>
+                        <h2>EL GRAFO</h2>
+                    </div>
+                    <div>
+                        <img src="imagenes/logoAlgoritmo.png" alt="logoAlgoritmo" width="80%" height="80%">
+                    </div>
+                    <div>
+                        <a href="#"><img src="imagenes/logoVideo.png" alt="logo ver video" width="80px" height="70px"></a>
+                        <a href="#"><img src="imagenes/logoDescargar.png" alt="logo descargar" width="100px" height="70px" ></a>
+                    </div>
+                </div>
+                <div class="menu-scroll">
+                    <ul>
+                        <a href="#"><li>Json</li></a>
+                        <a href="#"><li>Asignación</li></a>
+                        <a href="#"><li>Opción 3</li></a>
+                        <a href="#"><li>Opción 3</li></a>
+                        <a href="#"><li>Opción 3</li></a>
+                        <a href="#"><li>Opción 3</li></a>
+                        <a href="#"><li>Opción 3</li></a>
+                        <a href="#"><li>Opción 3</li></a>
+                        <a href="#"><li>Opción 3</li></a>
+                    </ul>
+                </div>
+            </div>
+            <script src="scripts/script.js"></script>
+        </div>
+        <!-- FIN del menu -->
+
+        <!-- INICIO grafo -->
+        <div class="contenedorGrafo">
+            <div style="height: 80vh; width: 100.5%;">
+                <table border=0 style="width: 100%; height: 100%; max-height: 80vh;">
+                    <tr>
+                        <td style="width: 60%;">
+                            <svg id="canvas" style="width: 99%;background-color: #A4F5A6;max-height: 100%;">
+                                <defs>
+                                    <marker id="arrow" markerWidth="5" markerHeight="5" refX="15" refY="5" orient="auto" markerUnits="strokeWidth">
+                                        
+                                    </marker>
+                                </defs>
+                            </svg>
+                        </td>
+                        <td style="width: 40%;padding:2vh ;">
+                            <center>
+                                <h1 style="color: #ffffff">Matriz de adyacencia
+                                </h1>
+                                <table id="tablaMatriz" class="matriz" style="color: #ffffff;"></table>
+                            </center>
+                        </td>
+                    </tr>
+            </table>    
+            </div>
+            <br>
+            <center>
+            <div class="controls" style="margin-top: 3vh;">
+                <button id="vaciarBtn" style="background-color: #B2A1FF;border-radius: 20vh;height: 10vh;width:20vh;color: #222222;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Nuevo grafo</button>
+                <button id="guardarGrafo" style="background-color: #B2A1FF;border-radius: 20vh;height: 10vh;width:20vh;color: #222222;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Guardar JSON</button>
+                <button id="importarDato" style="background-color: #B2A1FF;border-radius: 20vh;height: 10vh;width:20vh;color: #222222;font-family:Verdana, Geneva, Tahoma, sans-serif;font-weight: bolder;border: 0;">Importar Garfo</button>
+                <input type="file" id="archivo" accept="application/json" style="display: none;">
+                
+        
+                <div id="listaNodos" style="text-align: center; margin-top: 10px;"></div>
+               
+            </div>
+        
+            <div id="menu" class="menu">
+                <button onclick="agregarBucle()">Agregar Bucle</button>
+                <button onclick="cambiarNombre()">Cambiar nombre</button>
+                <input type="color" id="colorPicker" onchange="cambiarColor(this.value)">
+                <button onclick="eliminarNodo()">Eliminar nodo</button>
+                
+            </div>
+        
+            </center>
+        </div>
+    </div>
+
+    
+
+
 <header>
     <div class="logo-container">
         <img src="algorithm_8616578.png" alt="Logo">

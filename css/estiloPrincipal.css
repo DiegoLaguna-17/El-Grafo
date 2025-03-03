@@ -1,0 +1,110 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.contenedorPrincipal {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    background-color: #222222;
+}
+
+.contenedorMenu {
+    width: 18%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.contenedorGrafo {
+    width: 82%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #FFFFFF;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Menú lateral */
+.menuPrincipal {
+    width: 250px;
+    height: 100vh;
+    background-color: #222222;
+    color: #222222;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Área superior fija */
+.menu-header {
+    height: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    background: #D0D2CF;
+}
+
+/* Contenedor del scroll */
+.menu-scroll {
+    height: 50%;
+    overflow-y: auto;
+    padding: 10px;
+    position: relative;
+    background-color: #D0D2CF;
+}
+
+/* Estilos de los elementos del menú */
+.menu-scroll ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    background-color: #D0D2CF;
+}
+
+.menu-scroll a{
+    text-decoration: none;
+    width: 80%;
+}
+
+.menu-scroll li {
+    background: #222222;
+    color: white;
+    padding: 15px;
+    font-weight: bolder;
+    text-align: center;
+    font-size: 25px;
+    border-radius: 8px;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+/* Efecto cuando el mouse pasa sobre una opción */
+.menu-scroll li:hover {
+    transform: scale(1.2) !important;
+    background: #A4F5A6;
+    color: #222222;
+}
+
+
+
+
+
+
+
+
+.contenedorGrafo{
+    background-color: #222222;
+}
