@@ -86,23 +86,32 @@ export default class Grafo {
         const haciaNodo = this.nodos.find(n => n.id === arco.hacia);
     
         if (deNodo.id === haciaNodo.id) {
-            // Bucle
-            const loop = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            // Bucle 
+            const loop = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             const x = deNodo.x;
             const y = deNodo.y;
-            if (x < 500) {
-                loop.setAttribute("d", `M ${x - 25} ${y + 15} C ${x - 80} ${y}, ${x - 40} ${y - 80}, ${x - 15} ${y - 15}`);
-            } else {
-                loop.setAttribute("d", `M ${x + 25} ${y + 15} C ${x + 80} ${y}, ${x + 30} ${y - 80}, ${x + 15} ${y - 15}`);
-            }
+            const radius = 30; 
+    
+            loop.setAttribute("cx", x);
+            loop.setAttribute("cy", y - radius); 
+            loop.setAttribute("r", radius);
             loop.setAttribute("stroke", "aqua");
             loop.setAttribute("stroke-width", "1.5");
             loop.setAttribute("fill", "none");
             loop.setAttribute("class", "arco");
     
+            const arrowAngle = Math.PI; 
+            const arrowX = x + radius * Math.cos(arrowAngle); 
+            const arrowY = (y - radius) + radius * Math.sin(arrowAngle); 
+            const tangentAngle = arrowAngle + Math.PI / 2; 
+    
+            this.svg.appendChild(loop);
+    
+            this.dibujarFlecha(arrowX, arrowY, tangentAngle);
+    
             const pesoText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            pesoText.setAttribute("x", x < 500 ? x - 35 : x + 35);
-            pesoText.setAttribute("y", y - 10);
+            pesoText.setAttribute("x", x); 
+            pesoText.setAttribute("y", y - 2 * radius - 10); 
             pesoText.setAttribute("class", "peso");
             pesoText.textContent = arco.valor;
     
@@ -113,10 +122,9 @@ export default class Grafo {
                 this.dibujarGrafo();
             });
     
-            this.svg.appendChild(loop);
             this.svg.appendChild(pesoText);
         } else {
-            // Arco curveado
+            // Arco curveado (Normal)
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
             const diferenciax = haciaNodo.x - deNodo.x;
             const diferenciay = haciaNodo.y - deNodo.y;
@@ -137,7 +145,7 @@ export default class Grafo {
             const radio = 30; 
             const minDistance = radio * 1.3; 
             const t = Math.max(0.85, 1 - (minDistance / distancia)); 
-            
+    
             const arrowX = Math.pow(1 - t, 2) * deNodo.x + 2 * (1 - t) * t * controlCurvaX + Math.pow(t, 2) * haciaNodo.x;
             const arrowY = Math.pow(1 - t, 2) * deNodo.y + 2 * (1 - t) * t * controlCurvaY + Math.pow(t, 2) * haciaNodo.y;
     
