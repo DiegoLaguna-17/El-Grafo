@@ -8,18 +8,18 @@
 </head>
 <body>
     <div class="container">
-        <!-- Menu Button -->
+        <!-- Menu -->
         <button id="menuButton" class="menu-button">☰ Menú</button>
 
-        <!-- Collapsible Sidebar -->
+        <!-- Sidebar -->
         <div id="sidebar" class="sidebar">
-            <!-- Part 1: Title with Icon -->
+            <!-- Parte 1 -->
             <div class="settings-header">
                 <h2>EL GRAFO</h2>
                 <img src="media/logoAlgoritmo.png" alt="Icono" class="settings-icon">
             </div>
 
-            <!-- Part 2: Buttons for Tutorial and PDF -->
+            <!-- Parte 2 -->
             <div class="settings-buttons">
                 <a href="#" class="settings-button">
                     <img src="media/logoVideo.png" alt="Ver video" class="button-icon">
@@ -29,33 +29,42 @@
                 </a>
             </div>
 
-            <!-- Part 3: Scrollable Menu -->
+            <!-- Parte 3 -->
             <div class="settings-menu">
-                <ul>
-                    <li><a href="#">Json</a></li>
-                    <li><a href="#">Asignación</a></li>
-                    <li><a href="#">Opción 3</a></li>
-                    <!-- Add more options as needed -->
-                </ul>
+                <h3>Seleccione un algoritmo:</h3>
+                <label class="radio-button">
+                    <input type="radio" name="algorithm" value="johnson" checked>
+                    <span class="radio-label">Johnson's Algorithm</span>
+                </label>
+                <label class="radio-button">
+                    <input type="radio" name="algorithm" value="dijkstra">
+                    <span class="radio-label">Dijkstra's Algorithm</span>
+                </label>
+                <label class="radio-button">
+                    <input type="radio" name="algorithm" value="floyd-warshall">
+                    <span class="radio-label">Floyd-Warshall Algorithm</span>
+                </label>
+                <!-- Aquí van más algoritmos -->
             </div>
         </div>
 
-        <!-- Column SVG -->
+        <!-- SVG -->
         <div class="column-svg">
-            <!-- Part 1: Control Buttons -->
+            <!-- Panel de Control -->
             <div class="controls">
                 <button id="vaciarBtn">Nuevo grafo</button>
                 <button id="guardarGrafo">Guardar JSON</button>
                 <button id="importarDato">Importar Grafo</button>
                 <input type="file" id="archivo" accept="application/json" style="display: none;">
+                <button id="solve-btn">Resolver</button>
             </div>
 
-            <!-- Part 2: SVG Canvas -->
+            <!-- SVG Canvas -->
             <div class="svg-container">
                 <svg id="canvas"></svg>
             </div>
 
-            <!-- Part 3: Matriz de Adyacencia -->
+            <!-- Matriz de Adyacencia -->
             <div class="matriz-container">
                 <h1>Matriz de adyacencia</h1>
                 <div class="matriz-scroll">
@@ -73,13 +82,10 @@
         <button id="eliminarNodoBtn">Eliminar nodo</button>
     </div>
 
-    <!-- Include app.js as a module -->
     <script type="module" src="js/app.js"></script>
     <script src="js/sideBarMenu.js"></script>
 
-
     <script>
-        // Toggle Sidebar
         const menuButton = document.getElementById("menuButton");
         const sidebar = document.getElementById("sidebar");
 
@@ -87,6 +93,5 @@
             sidebar.classList.toggle("active");
         });
     </script>
-
 </body>
 </html>

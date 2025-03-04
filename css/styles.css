@@ -1,4 +1,3 @@
-/* General Styles */
 * {
     margin: 0;
     padding: 0;
@@ -11,22 +10,20 @@ body {
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Align content to the top */
-    overflow-y: auto; /* Enable page scrolling */
+    align-items: flex-start; 
+    overflow-y: auto; 
 }
 
-/* Container for Columns */
 .container {
     user-select: none;
     display: flex;
     width: 100%;
-    min-height: 100vh; /* Allow container to grow with content */
+    min-height: 100vh; 
     background-color: #222222;
     position: relative;
     padding: 20px;
 }
 
-/* Menu Button */
 .menu-button {
     position: absolute;
     top: 20px;
@@ -45,21 +42,20 @@ body {
     background-color: #9c8aff;
 }
 
-/* Collapsible Sidebar */
 .sidebar {
     width: 250px;
     height: 100vh;
     background-color: #ffffff;
     padding: 20px;
-    position: fixed; /* Fix sidebar position */
+    position: fixed; 
     top: 0;
-    left: -250px; /* Hide sidebar by default */
+    left: -250px; 
     transition: left 0.3s;
     z-index: 999;
 }
 
 .sidebar.active {
-    left: 0; /* Show sidebar when active */
+    left: 0;
 }
 
 .settings-header {
@@ -120,19 +116,17 @@ body {
     transform: scale(1.05);
 }
 
-/* Column SVG (Full width) */
 .column-svg {
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 20px;
     padding: 20px;
-    margin-left: 0; /* Remove left margin */
+    margin-left: 0; 
 }
 
-/* SVG Container */
 .svg-container {
-    height: 80vh; /* Fixed height for SVG */
+    height: 80vh; 
     background-color: #f4d9ff;
     border: 1vh solid black;
 }
@@ -142,7 +136,6 @@ svg {
     height: 100%;
 }
 
-/* Controls */
 .controls {
     display: flex;
     justify-content: center;
@@ -166,18 +159,17 @@ svg {
     background-color: #9c8aff;
 }
 
-/* Matriz de Adyacencia */
 .matriz-container {
     text-align: center;
-    flex-grow: 1; /* Allow table to grow vertically */
+    flex-grow: 1; 
     display: flex;
     flex-direction: column;
     color: white;
 }
 
 .matriz-scroll {
-    overflow-y: auto; /* Enable vertical scrolling */
-    max-height: 40vh; /* Limit height to prevent excessive growth */
+    overflow-y: auto; 
+    max-height: 40vh; 
     border: 1px solid #ccc;
     margin-top: 10px;
 }
@@ -192,7 +184,6 @@ svg {
     border: 1px solid white;
     padding: 10px;
 }
-
 
 #menu {
     display: none; 
@@ -228,4 +219,69 @@ svg {
 #menu input[type="color"] {
     padding: 5px;
     height: 40px; 
+}
+
+.radio-button {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    cursor: pointer;
+}
+
+.radio-button input[type="radio"] {
+    margin-right: 10px;
+}
+
+.radio-label {
+    font-size: 16px;
+    color: #333;
+}
+
+.radio-button input[type="radio"]:checked + .radio-label {
+    font-weight: bold;
+    color: #0059b8;
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border: 1px solid black;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    max-width: 90%;
+    overflow-x: auto;
+}
+
+.modal table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.modal th, .modal td {
+    border: 1px solid black;
+    padding: 10px;
+}
+
+.modal th {
+    background-color: #f2f2f2;
+}
+
+.modal button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal button:hover {
+    background-color: #0056b3;
 }
