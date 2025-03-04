@@ -4,6 +4,8 @@ import GraphEvents from './Events/graphEvents.js';
 const grafo = new Grafo();
 const graphEvents = new GraphEvents(grafo);
 
+grafo.graphEvents = graphEvents;
+
 // Add event listeners for control buttons
 document.getElementById("vaciarBtn").addEventListener("click", () => grafo.vaciarCanvas());
 document.getElementById("guardarGrafo").addEventListener("click", () => grafo.guardarGrafo());

@@ -1,5 +1,5 @@
 export default class Grafo {
-    constructor() {
+    constructor(graphEvents) {
         this.nodos = []; 
         this.arcos = []; 
         this.nodoElegido = null; 
@@ -7,6 +7,7 @@ export default class Grafo {
         this.nodoEliminar = null; 
         this.nodoBucle = null; 
         this.svg = document.getElementById("canvas"); 
+        this.graphEvents = graphEvents; 
     }
 
     agregarNodo(x, y) {
@@ -21,7 +22,12 @@ export default class Grafo {
         this.dibujarGrafo();
     }
 
-    agregarArco(de, hacia, valor = 1) {
+    agregarArco(de, hacia, valor = "?") {
+        if (this.tieneArco(de, hacia)) {
+            alert("Ya existe un arco entre estos nodos. No se puede agregar otro");
+            return;
+        }
+
         this.arcos.push({ de, hacia, valor });
         this.dibujarGrafo();
     }
@@ -111,15 +117,12 @@ export default class Grafo {
     
             const pesoText = document.createElementNS("http://www.w3.org/2000/svg", "text");
             pesoText.setAttribute("x", x); 
-            pesoText.setAttribute("y", y - 2 * radius - 10); 
+            pesoText.setAttribute("y", y - 2 * radius - 5); 
             pesoText.setAttribute("class", "peso");
             pesoText.textContent = arco.valor;
     
-            loop.addEventListener("click", () => {
-                const weight = prompt("Ingrese peso:", arco.valor);
-                arco.valor = parseInt(weight) || 1;
-                pesoText.textContent = arco.valor;
-                this.dibujarGrafo();
+            pesoText.addEventListener("click", () => {
+                this.graphEvents.solicitarPeso(arco); 
             });
     
             this.svg.appendChild(pesoText);
@@ -157,19 +160,26 @@ export default class Grafo {
     
             const peso = document.createElementNS("http://www.w3.org/2000/svg", "text");
             peso.setAttribute("x", controlCurvaX);
-            peso.setAttribute("y", controlCurvaY);
+            peso.setAttribute("y", controlCurvaY - 10); 
             peso.setAttribute("class", "peso");
             peso.textContent = arco.valor;
     
-            path.addEventListener("click", () => {
-                const weight = prompt("Ingrese peso:", arco.valor);
-                arco.valor = parseInt(weight) || 1;
-                peso.textContent = arco.valor;
-                this.dibujarGrafo();
+            peso.addEventListener("click", () => {
+                this.graphEvents.solicitarPeso(arco); 
             });
     
             this.svg.appendChild(peso);
         }
+    }
+
+    tieneBucle(idNodo) {
+        return this.arcos.some(arco => arco.de === idNodo && arco.hacia === idNodo);
+    }
+
+    tieneArco(de, hacia) {
+        return this.arcos.some(arco => 
+            (arco.de === de && arco.hacia === hacia)
+        );
     }
 
     generarMatriz() {
