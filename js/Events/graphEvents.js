@@ -163,7 +163,13 @@ export default class GraphEvents {
     }
 
     displayCPMResult(result) {
+        const existingModal = document.querySelector('.cpm-modal');
+        if (existingModal) {
+            document.body.removeChild(existingModal);
+        }
+
         const modal = document.createElement('div');
+        modal.classList.add('cpm-modal'); 
         modal.style.position = 'fixed';
         modal.style.bottom = '20px'; 
         modal.style.left = '20px'; 
@@ -173,7 +179,7 @@ export default class GraphEvents {
         modal.style.borderRadius = '10px';
         modal.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
         modal.style.zIndex = '1000';
-        modal.style.maxWidth = '600px';
+        modal.style.maxWidth = '400px';
         modal.style.overflowX = 'auto';
 
         const criticalPathNames = result.criticalPath.map(nodeId => {
@@ -183,14 +189,13 @@ export default class GraphEvents {
 
         const content = document.createElement('div');
         content.innerHTML = `
-            <h3>Resultado del Algoritmo de Johnson</h3>
-            <p><strong>Camino Crítico:</strong> ${criticalPathNames.join(' → ')}</p>
-            <p><strong>Costo Total:</strong> ${result.earliestFinish[result.criticalPath[result.criticalPath.length - 1]]}</p>
+            <h3>Resultado de Algoritmo de Johnson</h3>
+            <p><strong>Camino crítico:</strong> ${criticalPathNames.join(' → ')}</p>
         `;
         modal.appendChild(content);
 
         const closeButton = document.createElement('button');
-        closeButton.textContent = 'Close';
+        closeButton.textContent = 'Cerrar';
         closeButton.style.marginTop = '20px';
         closeButton.style.padding = '10px 20px';
         closeButton.style.backgroundColor = '#FF0000';
@@ -199,7 +204,7 @@ export default class GraphEvents {
         closeButton.style.borderRadius = '5px';
         closeButton.style.cursor = 'pointer';
         closeButton.addEventListener('click', () => {
-            document.body.removeChild(modal);
+            document.body.removeChild(modal); 
         });
         modal.appendChild(closeButton);
 

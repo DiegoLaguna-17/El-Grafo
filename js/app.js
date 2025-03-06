@@ -1,5 +1,5 @@
 import Grafo from './Algorithms/Grafo.js';
-import CPM from './Algorithms/CPM.js'; 
+import CPM from './Algorithms/CPM.js';
 import GraphEvents from './Events/graphEvents.js';
 
 const grafo = new Grafo();
@@ -12,6 +12,33 @@ const algorithmInstances = {
     cpm: new CPM(),
     // Aquí van las demás instancias (algoritmos)
 };
+
+const currentAlgorithmElement = document.getElementById('currentAlgorithm');
+
+function updateCurrentAlgorithmText() {
+    const selectedAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
+    let algorithmName;
+
+    switch (selectedAlgorithm) {
+        case 'cpm':
+            algorithmName = 'Johnson';
+            break;
+        case 'asignacion':
+            algorithmName = 'Asignación';
+            break;
+        case 'noroeste':
+            algorithmName = 'Noroeste';
+            break;
+        default:
+            algorithmName = 'Johnson'; 
+    }
+
+    currentAlgorithmElement.textContent = `Actual: ${algorithmName}`;
+}
+
+document.querySelectorAll('input[name="algorithm"]').forEach(radio => {
+    radio.addEventListener('change', updateCurrentAlgorithmText);
+});
 
 // Panel de control
 document.getElementById("vaciarBtn").addEventListener("click", () => grafo.vaciarCanvas());
@@ -37,7 +64,6 @@ document.getElementById("solve-btn").addEventListener("click", () => {
     algorithmInstance.arcos = [...grafo.arcos];
     algorithmInstance.graphEvents = graphEvents;
 
-    // Execute the selected algorithm
     if (selectedAlgorithm === 'cpm') {
         const result = algorithmInstance.criticalPathMethod();
         if (result !== null) {

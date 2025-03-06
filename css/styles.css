@@ -285,3 +285,11 @@ svg {
 .modal button:hover {
     background-color: #0056b3;
 }
+
+#currentAlgorithm {
+    margin-right: 20px;
+    font-weight: bold;
+    color: white;
+    font-size: 16px;
+    align-self: center;
+}

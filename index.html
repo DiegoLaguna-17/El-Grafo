@@ -34,7 +34,7 @@
                 <h3>Seleccione un algoritmo:</h3>
                 <label class="radio-button">
                     <input type="radio" name="algorithm" value="cpm" checked>
-                    <span class="radio-label">Critical Path Method (CPM)</span>
+                    <span class="radio-label">Johnson</span>
                 </label>
                 <label class="radio-button">
                     <input type="radio" name="algorithm" value="asignacion">
@@ -52,8 +52,9 @@
         <div class="column-svg">
             <!-- Panel de Control -->
             <div class="controls">
-                <button id="vaciarBtn">Nuevo grafo</button>
-                <button id="guardarGrafo">Guardar JSON</button>
+                <span id="currentAlgorithm" style="margin-right: 20px; font-weight: bold; color: white;">Actual: Johnson</span>
+                <button id="vaciarBtn">Vaciar Lienzo</button>
+                <button id="guardarGrafo">Guardar</button>
                 <button id="importarDato">Importar Grafo</button>
                 <input type="file" id="archivo" accept="application/json" style="display: none;">
                 <button id="solve-btn">Resolver</button>
