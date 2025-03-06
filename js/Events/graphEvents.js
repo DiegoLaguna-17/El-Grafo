@@ -1,10 +1,11 @@
 import Grafo from '../Algorithms/Grafo.js';
+import CPM from '../Algorithms/CPM.js'; 
 
 export default class GraphEvents {
     constructor(grafo) {
-        this.grafo = grafo; 
-        this.svg = document.getElementById("canvas"); 
-        this.menu = document.getElementById("menu"); 
+        this.grafo = grafo;
+        this.svg = document.getElementById("canvas");
+        this.menu = document.getElementById("menu");
         this.inicializarEventos();
     }
 
@@ -59,7 +60,7 @@ export default class GraphEvents {
                 alert("Ya existe un bucle en este nodo. No se puede agregar otro.");
                 return;
             }
-            this.grafo.agregarArco(this.grafo.nodoBucle.id, this.grafo.nodoBucle.id, "?"); 
+            this.grafo.agregarArco(this.grafo.nodoBucle.id, this.grafo.nodoBucle.id, "?");
         }
     }
 
@@ -99,7 +100,7 @@ export default class GraphEvents {
                 return;
             }
             this.grafo.agregarArco(this.grafo.nodoElegido.id, nodo.id);
-            this.solicitarPeso(this.grafo.arcos[this.grafo.arcos.length - 1]); 
+            this.solicitarPeso(this.grafo.arcos[this.grafo.arcos.length - 1]);
         }
         this.grafo.nodoElegido = null;
     }
@@ -115,100 +116,84 @@ export default class GraphEvents {
         this.grafo.dibujarGrafo();
     }
 
-
-
     solveGraph() {
         const selectedAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
-    
-        if (selectedAlgorithm === 'johnson') {
-            if (this.grafo instanceof Johnson) {
-                // Copiar el estado actual de Grafo -> Johnson
-                this.grafo.nodos = [...this.grafo.nodos];
-                this.grafo.arcos = [...this.grafo.arcos];
-    
-                // Resolver por Johnson
-                const shortestPaths = this.grafo.johnsonsAlgorithm();
-                if (shortestPaths !== null) {
-                    this.displaySolutionMatrix(shortestPaths);
-                }
-            } else {
-                alert("Johnson no es aplicable para este grafo.");
+
+        if (selectedAlgorithm === 'cpm') {
+            const cpmInstance = new CPM();
+            cpmInstance.nodos = [...this.grafo.nodos];
+            cpmInstance.arcos = [...this.grafo.arcos];
+            cpmInstance.graphEvents = this.grafo.graphEvents;
+
+            const result = cpmInstance.criticalPathMethod();
+            if (result !== null) {
+                this.highlightCriticalPath(result.criticalPath);
+                this.displayCPMResult(result); 
             }
         } else {
             alert(`Algoritmo "${selectedAlgorithm}" aún no está implementado.`);
         }
     }
 
-    displaySolutionMatrix(shortestPaths) {
-        // Modal
+    highlightCriticalPath(criticalPath) {
+        this.grafo.nodos.forEach(nodo => {
+            nodo.color = nodo.color === "#E4FF00" ? "blue" : nodo.color;
+        });
+        this.grafo.arcos.forEach(arco => {
+            arco.color = arco.color === "#E4FF00" ? "black" : arco.color; 
+        });
+
+        criticalPath.forEach(nodeId => {
+            const nodo = this.grafo.nodos.find(n => n.id === nodeId);
+            if (nodo) {
+                nodo.color = "#E4FF00";
+            }
+        });
+
+        for (let i = 0; i < criticalPath.length - 1; i++) {
+            const fromNodeId = criticalPath[i];
+            const toNodeId = criticalPath[i + 1];
+            const arco = this.grafo.arcos.find(arco => arco.de === fromNodeId && arco.hacia === toNodeId);
+            if (arco) {
+                arco.color = "#E4FF00";
+            }
+        }
+
+        this.grafo.dibujarGrafo();
+    }
+
+    displayCPMResult(result) {
         const modal = document.createElement('div');
         modal.style.position = 'fixed';
-        modal.style.top = '50%';
-        modal.style.left = '50%';
-        modal.style.transform = 'translate(-50%, -50%)';
+        modal.style.bottom = '20px'; 
+        modal.style.left = '20px'; 
         modal.style.backgroundColor = 'white';
         modal.style.padding = '20px';
         modal.style.border = '1px solid black';
         modal.style.borderRadius = '10px';
         modal.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
         modal.style.zIndex = '1000';
-        modal.style.maxWidth = '90%';
+        modal.style.maxWidth = '600px';
         modal.style.overflowX = 'auto';
-    
-        // Matriz de solución
-        const table = document.createElement('table');
-        table.style.borderCollapse = 'collapse';
-        table.style.width = '100%';
-        table.style.textAlign = 'center';
-    
-        // Títulos (headers)
-        const headerRow = document.createElement('tr');
-        const emptyHeader = document.createElement('th'); 
-        emptyHeader.style.border = '1px solid black';
-        emptyHeader.style.padding = '10px';
-        emptyHeader.style.backgroundColor = '#f2f2f2';
-        headerRow.appendChild(emptyHeader);
-    
-        this.grafo.nodos.forEach((nodo, index) => {
-            const th = document.createElement('th');
-            th.textContent = nodo.nombre;
-            th.style.border = '1px solid black';
-            th.style.padding = '10px';
-            th.style.backgroundColor = '#f2f2f2';
-            headerRow.appendChild(th);
+
+        const criticalPathNames = result.criticalPath.map(nodeId => {
+            const nodo = this.grafo.nodos.find(n => n.id === nodeId);
+            return nodo ? nodo.nombre : `Nodo ${nodeId}`;
         });
-        table.appendChild(headerRow);
-    
-        // Valores
-        shortestPaths.forEach((distances, index) => {
-            const row = document.createElement('tr');
-    
-            const nodeCell = document.createElement('td');
-            nodeCell.textContent = this.grafo.nodos[index].nombre;
-            nodeCell.style.border = '1px solid black';
-            nodeCell.style.padding = '10px';
-            nodeCell.style.backgroundColor = '#f2f2f2';
-            row.appendChild(nodeCell);
-    
-            Object.values(distances).forEach(distance => {
-                const cell = document.createElement('td');
-                cell.textContent = distance === Infinity ? '∞' : distance; // ∞ es para nodos inalcanzables
-                cell.style.border = '1px solid black';
-                cell.style.padding = '10px';
-                row.appendChild(cell);
-            });
-    
-            table.appendChild(row);
-        });
-    
-        modal.appendChild(table);
-    
-        // Botón
+
+        const content = document.createElement('div');
+        content.innerHTML = `
+            <h3>Resultado del Algoritmo de Johnson</h3>
+            <p><strong>Camino Crítico:</strong> ${criticalPathNames.join(' → ')}</p>
+            <p><strong>Costo Total:</strong> ${result.earliestFinish[result.criticalPath[result.criticalPath.length - 1]]}</p>
+        `;
+        modal.appendChild(content);
+
         const closeButton = document.createElement('button');
         closeButton.textContent = 'Close';
         closeButton.style.marginTop = '20px';
         closeButton.style.padding = '10px 20px';
-        closeButton.style.backgroundColor = '#007BFF';
+        closeButton.style.backgroundColor = '#FF0000';
         closeButton.style.color = 'white';
         closeButton.style.border = 'none';
         closeButton.style.borderRadius = '5px';
@@ -217,7 +202,7 @@ export default class GraphEvents {
             document.body.removeChild(modal);
         });
         modal.appendChild(closeButton);
-    
+
         document.body.appendChild(modal);
     }
 }

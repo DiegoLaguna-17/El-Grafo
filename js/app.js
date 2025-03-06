@@ -1,5 +1,5 @@
 import Grafo from './Algorithms/Grafo.js';
-import Johnson from './Algorithms/Johnson.js'; 
+import CPM from './Algorithms/CPM.js'; 
 import GraphEvents from './Events/graphEvents.js';
 
 const grafo = new Grafo();
@@ -7,10 +7,9 @@ const graphEvents = new GraphEvents(grafo);
 
 grafo.graphEvents = graphEvents;
 
-// Instancias de algoritmos
 const algorithmInstances = {
-    grafo: grafo, 
-    johnson: new Johnson(), 
+    grafo: grafo,
+    cpm: new CPM(),
     // Aquí van las demás instancias (algoritmos)
 };
 
@@ -26,21 +25,24 @@ document.getElementById("solve-btn").addEventListener("click", () => {
 
     let algorithmInstance;
     switch (selectedAlgorithm) {
-        case 'johnson':
-            algorithmInstance = algorithmInstances.johnson;
+        case 'cpm':
+            algorithmInstance = algorithmInstances.cpm;
             break;
         default:
-            algorithmInstance = algorithmInstances.grafo; 
+            algorithmInstance = algorithmInstances.grafo;
             break;
     }
 
     algorithmInstance.nodos = [...grafo.nodos];
     algorithmInstance.arcos = [...grafo.arcos];
-    algorithmInstance.graphEvents = graphEvents; 
+    algorithmInstance.graphEvents = graphEvents;
 
-    if (selectedAlgorithm === 'johnson') {
-        const shortestPaths = algorithmInstance.johnsonsAlgorithm();
-        algorithmInstance.graphEvents.displaySolutionMatrix(shortestPaths);
+    // Execute the selected algorithm
+    if (selectedAlgorithm === 'cpm') {
+        const result = algorithmInstance.criticalPathMethod();
+        if (result !== null) {
+            algorithmInstance.graphEvents.displayCPMResult(result);
+        }
     } else {
         alert(`Algoritmo "${selectedAlgorithm}" aún no implementado.`);
     }
