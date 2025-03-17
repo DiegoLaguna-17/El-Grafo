@@ -273,8 +273,8 @@ export default class GraphEvents {
 
         const content = document.createElement('div');
         content.innerHTML = `
-            <h3>Resultado de Algoritmo de Johnson</h3>
-            <p><strong>Camino crítico:</strong> ${criticalPathNames.join(' → ')}</p>
+            <h3>Resultado para "Johnson" (Nodos amarillos)</h3>
+            <p><strong> - Camino crítico:</strong> ${criticalPathNames.join(' → ')}</p>
         `;
         modal.appendChild(content);
 

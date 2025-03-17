@@ -5,9 +5,35 @@ export default class CPM extends Grafo {
         super();
     }
 
+    hasSelfLoops() {
+        return this.arcos.some(arco => arco.de === arco.hacia);
+    }
+
+    hasCyclesBetweenNodes() {
+        const nodePairs = new Set();
+        for (const arco of this.arcos) {
+            const pair = [arco.de, arco.hacia].sort().join('-');
+            if (nodePairs.has(pair)) {
+                return true;
+            }
+            nodePairs.add(pair);
+        }
+        return false;
+    }
+
     criticalPathMethod() {
         if (this.nodos.length === 0) {
             alert("El grafo está vacío, por favor agregue nodos y arcos.");
+            return null;
+        }
+
+        if (this.hasSelfLoops()) {
+            alert("Algoritmo Johnson no es aplicable, el grafo contiene bucles.");
+            return null;
+        }
+
+        if (this.hasCyclesBetweenNodes()) {
+            alert("Algoritmo Johnson no es aplicable, el grafo contiene ciclos.");
             return null;
         }
 

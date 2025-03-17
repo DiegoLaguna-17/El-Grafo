@@ -135,11 +135,7 @@ document.getElementById("solve-btn").addEventListener("click", () => {
             algorithmInstance.graphEvents.resultadoAsignacion(resultado.pairs);
             algorithmInstance.graphEvents.displayASGResult(resultado);
         }
-            
         
-        else {
-                alert(`Algoritmo "${selectedAlgorithm}" aún no implementado.`);
-        }
     
             
    
