@@ -12,4 +12,5 @@ document.querySelector(".menu-scroll").addEventListener("scroll", function () {
         item.style.transform = `scale(${scale})`;
         item.style.opacity = scale; 
     });
+    
 });

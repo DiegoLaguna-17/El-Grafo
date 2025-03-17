@@ -293,3 +293,8 @@ svg {
     font-size: 16px;
     align-self: center;
 }
+
+.hidden {
+    display: none;
+    color: white;
+}

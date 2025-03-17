@@ -156,11 +156,95 @@ export default class GraphEvents {
             const arco = this.grafo.arcos.find(arco => arco.de === fromNodeId && arco.hacia === toNodeId);
             if (arco) {
                 arco.color = "#E4FF00";
+                
             }
         }
-
+       
         this.grafo.dibujarGrafo();
     }
+    
+    resultadoAsignacion(asignaciones){
+        asignaciones.forEach((a)=>{
+            let color=generarColor();
+            a.forEach((n)=>{
+                const nodo = this.grafo.nodos.find(m => m.nombre === n);
+                if (nodo) {
+                    nodo.color = color;
+                }
+            }); 
+        });
+        function generarColor() {
+            return `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`;
+        }
+        this.grafo.dibujarGrafo();
+    }
+
+
+
+
+
+
+    displayASGResult(result) {
+        const existingModal = document.querySelector('.asg-modal');
+        if (existingModal) {
+            document.body.removeChild(existingModal);
+        }
+
+        const modal = document.createElement('div');
+        modal.classList.add('asg-modal'); 
+        modal.style.position = 'fixed';
+        modal.style.bottom = '20px'; 
+        modal.style.left = '20px'; 
+        modal.style.backgroundColor = 'white';
+        modal.style.padding = '20px';
+        modal.style.border = '1px solid black';
+        modal.style.borderRadius = '10px';
+        modal.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+        modal.style.zIndex = '1000';
+        modal.style.maxWidth = '400px';
+        modal.style.overflowX = 'auto';
+
+        
+
+        const content = document.createElement('div');
+        content.innerHTML = `
+            <h3>Resultado de Algoritmo de Asignacion</h3>
+            <p><strong>Asigaciones:</strong> ${result.assignments}</p>
+            <p><strong>Costo total de asignacion:</strong> ${result.totalCost}</p>
+        `;
+        modal.appendChild(content);
+
+        const closeButton = document.createElement('button');
+        closeButton.textContent = 'Cerrar';
+        closeButton.style.marginTop = '20px';
+        closeButton.style.padding = '10px 20px';
+        closeButton.style.backgroundColor = '#FF0000';
+        closeButton.style.color = 'white';
+        closeButton.style.border = 'none';
+        closeButton.style.borderRadius = '5px';
+        closeButton.style.cursor = 'pointer';
+        closeButton.addEventListener('click', () => {
+            document.body.removeChild(modal); 
+        });
+        modal.appendChild(closeButton);
+
+        document.body.appendChild(modal);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     displayCPMResult(result) {
         const existingModal = document.querySelector('.cpm-modal');

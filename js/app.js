@@ -1,5 +1,6 @@
 import Grafo from './Algorithms/Grafo.js';
 import CPM from './Algorithms/CPM.js';
+import ASG from './Algorithms/ASG.js';
 import GraphEvents from './Events/graphEvents.js';
 
 const grafo = new Grafo();
@@ -10,6 +11,7 @@ grafo.graphEvents = graphEvents;
 const algorithmInstances = {
     grafo: grafo,
     cpm: new CPM(),
+    asg: new ASG(),
     // Aquí van las demás instancias (algoritmos)
 };
 
@@ -22,12 +24,18 @@ function updateCurrentAlgorithmText() {
     switch (selectedAlgorithm) {
         case 'cpm':
             algorithmName = 'Johnson';
+            document.getElementById("checkboxGroup1").style.display="none";
+
             break;
-        case 'asignacion':
-            algorithmName = 'Asignación';
+            
+        case 'Asignacion':
+            algorithmName = 'Asignacion';
+            document.getElementById("checkboxGroup1").style.display="block";
             break;
+            
         case 'noroeste':
             algorithmName = 'Noroeste';
+            document.getElementById("checkboxGroup1").style.display="none";
             break;
         default:
             algorithmName = 'Johnson'; 
@@ -55,6 +63,11 @@ document.getElementById("solve-btn").addEventListener("click", () => {
         case 'cpm':
             algorithmInstance = algorithmInstances.cpm;
             break;
+          
+        case 'Asignacion':
+            algorithmInstance = algorithmInstances.asg;
+            break;
+          
         default:
             algorithmInstance = algorithmInstances.grafo;
             break;
@@ -63,13 +76,71 @@ document.getElementById("solve-btn").addEventListener("click", () => {
     algorithmInstance.nodos = [...grafo.nodos];
     algorithmInstance.arcos = [...grafo.arcos];
     algorithmInstance.graphEvents = graphEvents;
-
+    let maxMin;
     if (selectedAlgorithm === 'cpm') {
         const result = algorithmInstance.criticalPathMethod();
         if (result !== null) {
             algorithmInstance.graphEvents.displayCPMResult(result);
         }
-    } else {
-        alert(`Algoritmo "${selectedAlgorithm}" aún no implementado.`);
     }
-});
+    
+    if(selectedAlgorithm=='Asignacion'){
+        let eleccion=document.querySelector('input[name="check"]:checked').value;
+        let maxMin=eleccion==="true";
+        let asignador = algorithmInstance.crearMatrizCostos();
+        let matriz = []; // Asegurar que la matriz de salida esté inicializada
+        for (let i = 0; i < asignador.length; i++) {
+            let fila = [];
+            for (let j = 0; j < asignador[i].length; j++) { // Cambié asignador.length por asignador[i].length
+                if (asignador[i][j] && asignador[i][j].valor !== 0) { // Verifica si el objeto existe antes de acceder a .valor
+                    fila.push(asignador[i][j]);
+                }
+            }
+            if (fila.length !== 0) {
+                matriz.push(fila);
+            }
+        }
+        
+            let matrizCompleta = Array.from({ length: matriz.length+1 }, () => Array(matriz.length+1).fill(0));
+            matrizCompleta[0][0]=" ";
+            for(let i=0;i<matriz.length;i++){
+                grafo.nodos.forEach((n)=>{
+                    if(n.id==matriz[0][i].hacia){
+                        matrizCompleta[0][i+1]=n.nombre;
+                    }
+                });
+            }
+            for(let i=0;i<matriz.length;i++){
+                grafo.nodos.forEach((n)=>{
+                    if(n.id==matriz[i][0].de){
+                        matrizCompleta[i+1][0]=n.nombre;
+                    }
+                });
+            }
+            if(maxMin===true){
+                for(let i=0;i<matriz.length;i++){
+                    for(let j=0;j<matriz.length;j++){
+                        matrizCompleta[i+1][j+1]=matriz[i][j].valor;
+                    }
+                }
+            }else{
+                for(let i=0;i<matriz.length;i++){
+                    for(let j=0;j<matriz.length;j++){
+                        matrizCompleta[i+1][j+1]=matriz[i][j].valor*-1;
+                    }
+                }
+            }
+            const matrizC=matrizCompleta;
+            const resultado = algorithmInstance.hungarianAlgorithm(matrizC,maxMin);
+            algorithmInstance.graphEvents.resultadoAsignacion(resultado.pairs);
+            algorithmInstance.graphEvents.displayASGResult(resultado);
+        }
+            
+        
+        else {
+                alert(`Algoritmo "${selectedAlgorithm}" aún no implementado.`);
+        }
+    
+            
+   
+    });
