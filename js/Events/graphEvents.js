@@ -18,7 +18,7 @@ export default class GraphEvents {
             this.menu.style.display = "none";
         });
 
-        document.getElementById("agregarBucleBtn").addEventListener("click", () => this.agregarBucle());
+        document.getElementById("agregarBucleBtn").addEventListener("click", () => this.grafo.agregarBucle());
         document.getElementById("cambiarNombreBtn").addEventListener("click", () => this.cambiarNombre());
         document.getElementById("colorPicker").addEventListener("change", (e) => this.cambiarColor(e.target.value));
         document.getElementById("eliminarNodoBtn").addEventListener("click", () => this.eliminarNodo());
@@ -51,16 +51,6 @@ export default class GraphEvents {
             this.menu.style.display = "block";
         } else {
             this.menu.style.display = "none";
-        }
-    }
-
-    agregarBucle() {
-        if (this.grafo.nodoBucle) {
-            if (this.grafo.tieneBucle(this.grafo.nodoBucle.id)) {
-                alert("Ya existe un bucle en este nodo. No se puede agregar otro.");
-                return;
-            }
-            this.grafo.agregarArco(this.grafo.nodoBucle.id, this.grafo.nodoBucle.id, "?");
         }
     }
 
@@ -179,11 +169,6 @@ export default class GraphEvents {
         this.grafo.dibujarGrafo();
     }
 
-
-
-
-
-
     displayASGResult(result) {
         const existingModal = document.querySelector('.asg-modal');
         if (existingModal) {
@@ -203,8 +188,6 @@ export default class GraphEvents {
         modal.style.zIndex = '1000';
         modal.style.maxWidth = '400px';
         modal.style.overflowX = 'auto';
-
-        
 
         const content = document.createElement('div');
         content.innerHTML = `
@@ -230,21 +213,6 @@ export default class GraphEvents {
 
         document.body.appendChild(modal);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     displayCPMResult(result) {
         const existingModal = document.querySelector('.cpm-modal');

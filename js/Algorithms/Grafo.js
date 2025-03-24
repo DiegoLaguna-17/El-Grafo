@@ -258,4 +258,14 @@ export default class Grafo {
         };
         reader.readAsText(file);
     }
+
+    agregarBucle() {
+        if (this.nodoBucle) {
+            if (this.tieneBucle(this.nodoBucle.id)) {
+                alert("Ya existe un bucle en este nodo. No se puede agregar otro.");
+                return;
+            }
+            this.agregarArco(this.nodoBucle.id, this.nodoBucle.id, "?");
+        }
+    }
 }
