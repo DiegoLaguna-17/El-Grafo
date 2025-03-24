@@ -178,7 +178,8 @@ export default class Grafo {
 
     tieneArco(de, hacia) {
         return this.arcos.some(arco => 
-            (arco.de === de && arco.hacia === hacia)
+            (arco.de === de && arco.hacia === hacia) ||
+            (arco.de === hacia && arco.hacia === de)
         );
     }
 
