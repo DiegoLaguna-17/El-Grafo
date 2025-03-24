@@ -5,6 +5,22 @@
         this.costMatrix = [];
     }
 
+    agregarArco(de, hacia, valor = "?") {
+        // Prevent loops (edges where de === hacia)
+        if (de === hacia) {
+            alert("No se permiten bucles en el algoritmo ASG.");
+            return;
+        }
+
+        // Prevent multiple edges between the same pair of nodes
+        if (this.tieneArco(de, hacia)) {
+            alert("Ya existe un arco entre estos nodos. No se puede agregar otro.");
+            return;
+        }
+
+        super.agregarArco(de, hacia, valor);
+    }
+
     // 🔹 Generar la matriz de costos desde los nodos y arcos
     crearMatrizCostos() {
         const n = this.nodos.length;

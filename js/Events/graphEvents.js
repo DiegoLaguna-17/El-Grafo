@@ -6,6 +6,7 @@ export default class GraphEvents {
         this.grafo = grafo;
         this.svg = document.getElementById("canvas");
         this.menu = document.getElementById("menu");
+        this.agregarBucleBtn = document.getElementById("agregarBucleBtn");
         this.inicializarEventos();
     }
 
@@ -18,7 +19,12 @@ export default class GraphEvents {
             this.menu.style.display = "none";
         });
 
-        document.getElementById("agregarBucleBtn").addEventListener("click", () => this.grafo.agregarBucle());
+        this.agregarBucleBtn.addEventListener("click", () => {
+            if (this.grafo.nodoBucle) {
+                this.grafo.agregarBucle();
+            }
+        });
+
         document.getElementById("cambiarNombreBtn").addEventListener("click", () => this.cambiarNombre());
         document.getElementById("colorPicker").addEventListener("change", (e) => this.cambiarColor(e.target.value));
         document.getElementById("eliminarNodoBtn").addEventListener("click", () => this.eliminarNodo());
@@ -49,6 +55,14 @@ export default class GraphEvents {
             this.menu.style.left = `${event.clientX}px`;
             this.menu.style.top = `${event.clientY}px`;
             this.menu.style.display = "block";
+
+            // Disable "Agregar Bucle" button for non-Grafo instances
+            const selectedAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
+            if (selectedAlgorithm !== 'grafo') {
+                this.agregarBucleBtn.disabled = true;
+            } else {
+                this.agregarBucleBtn.disabled = false;
+            }
         } else {
             this.menu.style.display = "none";
         }
@@ -85,10 +99,6 @@ export default class GraphEvents {
         const nodo = this.grafo.nodos.find(n => Math.hypot(n.x - x, n.y - y) < 30);
 
         if (this.grafo.nodoElegido && this.grafo.nodoElegido !== nodo) {
-            if (this.grafo.tieneArco(this.grafo.nodoElegido.id, nodo.id)) {
-                alert("Ya existe un arco entre estos nodos. No se puede agregar otro.");
-                return;
-            }
             this.grafo.agregarArco(this.grafo.nodoElegido.id, nodo.id);
             this.solicitarPeso(this.grafo.arcos[this.grafo.arcos.length - 1]);
         }
