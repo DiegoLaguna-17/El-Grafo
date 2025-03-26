@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/vis-network@latest/dist/vis-network.min.js"></script>
     <link rel="stylesheet" href="css/styles.css">
     <title>Editor de Grafos</title>
 </head>
@@ -15,8 +16,7 @@
         <div id="sidebar" class="sidebar">
             <!-- Parte 1 -->
             <div class="settings-header">
-                <h2>EL GRAFO</h2>
-                <img src="media/logoAlgoritmo.png" alt="Icono" class="settings-icon">
+                <h2>Algoritmos</h2>
             </div>
 
             <!-- Parte 2 -->
@@ -55,11 +55,6 @@
         <!-- SVG -->
         <div class="column-svg">
             <!-- Panel de Control -->
-            
-        
-            
-
-
             <div class="controls">
                 <span id="currentAlgorithm" style="margin-right: 20px; font-weight: bold; color: white;">Actual: Johnson</span>
                 <div id="checkboxGroup1" class="hidden">
@@ -75,10 +70,8 @@
                 <button id="solve-btn">Resolver</button>
             </div>
 
-            <!-- SVG Canvas -->
-            <div class="svg-container">
-                <svg id="canvas"></svg>
-            </div>
+            <!-- Contenedor para Grafos -->
+            <div id="network"></div>
 
             <!-- Matriz de Adyacencia -->
             <div class="matriz-container">
@@ -90,16 +83,16 @@
         </div>
     </div>
 
-    <!-- Context Menu -->
-    <div id="menu" class="menu">
-        <button id="agregarBucleBtn">Agregar Bucle</button>
-        <button id="cambiarNombreBtn">Cambiar nombre</button>
-        <input type="color" id="colorPicker">
-        <button id="eliminarNodoBtn">Eliminar nodo</button>
+    <!-- Node Context Menu -->
+    <div id="nodeContextMenu" class="context-menu" style="display: none; position: absolute;">
+        <button id="addLoopBtn">Add Loop</button>
+        <button id="changeLabelBtn">Change Node Label</button>
+        <input type="color" id="nodeColorPicker" value="#00E3C6">
+        <button id="deleteNodeBtn">Delete Node</button>
     </div>
 
-    <script type="module" src="js/app.js"></script>
     <script src="js/sideBarMenu.js"></script>
+    <script type="module" src="/js/eventHandler.js"></script>
 
     <script>
         const menuButton = document.getElementById("menuButton");
