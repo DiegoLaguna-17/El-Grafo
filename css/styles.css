@@ -5,20 +5,62 @@
     background-color: #f9f9f9;
 }
 
-/* Make edge labels more interactive */
+
+/* Edge context button styling */
+.edge-context-button {
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.edge-context-button:hover {
+    transform: scale(1.1);
+}
+
+.edge-context-button button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+/* Edge label styling - make sure this stays */
 .vis-edge .vis-label {
     cursor: pointer;
-    pointer-events: auto;
-    background-color: rgba(255, 255, 255, 0.7);
-    padding: 2px 5px;
-    border-radius: 3px;
-    border: 1px solid #ddd;
+    pointer-events: all;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .vis-edge .vis-label:hover {
-    background-color: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    background-color: #e3f2fd;
+    border-color: #90caf9;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
+
+
 
 * {
     margin: 0;
@@ -148,17 +190,6 @@ body {
     margin-left: 0; 
 }
 
-.svg-container {
-    height: 80vh; 
-    background-color: #f4d9ff;
-    border: 1vh solid black;
-}
-
-svg {
-    width: 100%;
-    height: 100%;
-}
-
 .controls {
     display: flex;
     justify-content: center;
@@ -257,50 +288,6 @@ svg {
 .radio-button input[type="radio"]:checked + .radio-label {
     font-weight: bold;
     color: #0059b8;
-}
-
-.modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 20px;
-    border: 1px solid black;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    max-width: 90%;
-    overflow-x: auto;
-}
-
-.modal table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: center;
-}
-
-.modal th, .modal td {
-    border: 1px solid black;
-    padding: 10px;
-}
-
-.modal th {
-    background-color: #f2f2f2;
-}
-
-.modal button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.modal button:hover {
-    background-color: #0056b3;
 }
 
 #currentAlgorithm {

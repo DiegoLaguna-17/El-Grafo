@@ -19,7 +19,7 @@ export default class Graph {
         this.edges.forEach(edge => {
             const fromIndex = nodeIds.indexOf(edge.from);
             const toIndex = nodeIds.indexOf(edge.to);
-            const weight = edge.label ? parseInt(edge.label) : 1;
+            const weight = edge.label ? parseInt(edge.label) : 0;
             matrix[fromIndex][toIndex] = weight;
         });
 

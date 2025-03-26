@@ -13,34 +13,119 @@ const options = {
     },
     edges: {
         color: '#000000',
+        width: 2,
+        font: {
+            size: 14,
+            face: 'arial',
+            strokeWidth: 5,
+            strokeColor: '#ffffff'
+        },
+        smooth: {
+            type: 'continuous'
+        },
         arrows: {
-            to: { enabled: true, scaleFactor: 1.5 },
+            to: { 
+                enabled: true, 
+                scaleFactor: 1.5 
+            },
         },
     },
+    interaction: {
+        hover: true,
+        tooltipDelay: 0
+    }
 };
 
 const data = { nodes, edges };
 const network = new vis.Network(container, data, options);
 const graph = new Graph(nodes, edges);
 
-// Variables Auxiliares
+//              ***** Variables Auxiliares *****
+// Opciones de menú contextual
 const addLoopBtn = document.getElementById('addLoopBtn');
 const changeLabelBtn = document.getElementById('changeLabelBtn');
 const nodeColorPicker = document.getElementById('nodeColorPicker');
 const deleteNodeBtn = document.getElementById('deleteNodeBtn');
 
+// Botones de Control
 const vaciarBtn = document.getElementById('vaciarBtn');
 const guardarGrafo = document.getElementById('guardarGrafo');
 const importarDato = document.getElementById('importarDato');
 const solve_btn = document.getElementById('solve-btn'); 
 
+// Comodines
 let isCreatingEdge = false;
 let sourceNodeId = null;
 let selectedNodeId = null;
 
+// Para editar el peso
+const edgeContextButton = document.getElementById('edgeContextButton');
+const changeWeightBtn = document.getElementById('changeWeightBtn');
+let selectedEdgeId = null;
+let edgeButtonTimeout = null;
+
+
+// ***** EVENTOS *****
+network.on("hoverEdge", function(params) {
+    selectedEdgeId = params.edge;
+    const pointer = params.pointer.DOM;
+    
+    if (edgeButtonTimeout) {
+        clearTimeout(edgeButtonTimeout);
+        edgeButtonTimeout = null;
+    }
+    
+    edgeContextButton.style.display = 'block';
+    edgeContextButton.style.left = pointer.x + 'px';
+    edgeContextButton.style.top = pointer.y + 'px';
+});
+
+network.on("blurEdge", function() {
+    edgeButtonTimeout = setTimeout(() => {
+        edgeContextButton.style.display = 'none';
+        selectedEdgeId = null;
+    }, 600); // Tiempo (ms) antes de desaparecer
+});
+
+edgeContextButton.addEventListener('mouseenter', function() {
+    if (edgeButtonTimeout) {
+        clearTimeout(edgeButtonTimeout);
+        edgeButtonTimeout = null;
+    }
+});
+
+edgeContextButton.addEventListener('mouseleave', function() {
+    edgeButtonTimeout = setTimeout(() => {
+        edgeContextButton.style.display = 'none';
+        selectedEdgeId = null;
+    }, 300);
+});
+
+network.on("click", function(params) {
+    if (!params.edges.length && !edgeContextButton.contains(params.event.target)) {
+        edgeContextButton.style.display = 'none';
+        selectedEdgeId = null;
+    }
+});
+
+changeWeightBtn.addEventListener('click', function() {
+    if (selectedEdgeId) {
+        const edge = edges.get(selectedEdgeId);
+        const newWeight = prompt('Ingrese nuevo peso:', edge.label || "0");
+        if (newWeight !== null) {
+            edges.update({
+                id: selectedEdgeId,
+                label: newWeight
+            });
+        }
+        edgeContextButton.style.display = 'none';
+        selectedEdgeId = null;
+    }
+});
+
 // Agregar Nodo
 network.on("click", function(params) {
-    if (params.nodes.length === 0) {
+    if (params.nodes.length === 0 && params.edges.length === 0) {
         const pointerPosition = params.pointer.canvas;
         const newNodeId = nodes.length + 1; 
         nodes.add({
@@ -66,7 +151,7 @@ network.on('doubleClick', function(params) {
                 edges.add({
                     from: sourceNodeId,
                     to: destinationNodeId,
-                    label: `Clickable Label`,
+                    label: "0", // Por defecto
                     arrows: 'to',
                 });
                 console.log(`Arco creado desde Nodo ${sourceNodeId} hacia ${destinationNodeId}`);
@@ -99,13 +184,14 @@ network.on('oncontext', function(params) {
     nodeContextMenu.style.top = pointer.y + 'px';
 });
 
+
 // Agregar Bucle
 addLoopBtn.addEventListener('click', function() {
     if (selectedNodeId) {
         edges.add({
             from: selectedNodeId,
             to: selectedNodeId,
-            label: 'Bucle',
+            label: '0',
             arrows: 'to'
         });
         nodeContextMenu.style.display = 'none';
@@ -187,7 +273,10 @@ document.getElementById('archivo').addEventListener('change', function(e) {
             graph.clear();
             
             nodes.add(graphData.nodes);
-            edges.add(graphData.edges);
+            edges.add(graphData.edges.map(edge => ({
+                ...edge,
+                label: edge.label || "0" 
+            })));
             
             console.log('Graph imported successfully');
 
