@@ -40,32 +40,98 @@ const data = { nodes, edges };
 const network = new vis.Network(container, data, options);
 const graph = new Graph(nodes, edges);
 
-//              ***** Variables Auxiliares *****
-// Opciones de menú contextual
+// Variables Auxiliares
 const addLoopBtn = document.getElementById('addLoopBtn');
 const changeLabelBtn = document.getElementById('changeLabelBtn');
 const nodeColorPicker = document.getElementById('nodeColorPicker');
 const deleteNodeBtn = document.getElementById('deleteNodeBtn');
-
-// Botones de Control
 const vaciarBtn = document.getElementById('vaciarBtn');
 const guardarGrafo = document.getElementById('guardarGrafo');
 const importarDato = document.getElementById('importarDato');
 const solve_btn = document.getElementById('solve-btn'); 
+const edgeContextButton = document.getElementById('edgeContextButton');
+const changeWeightBtn = document.getElementById('changeWeightBtn');
 
-// Comodines
 let isCreatingEdge = false;
 let sourceNodeId = null;
 let selectedNodeId = null;
-
-// Para editar el peso
-const edgeContextButton = document.getElementById('edgeContextButton');
-const changeWeightBtn = document.getElementById('changeWeightBtn');
 let selectedEdgeId = null;
 let edgeButtonTimeout = null;
 
+// Color palette for assignments
+const colorPalette = [
+    '#FF9AA2', '#FFB7B2', '#FFDAC1', '#E2F0CB', 
+    '#B5EAD7', '#C7CEEA', '#F8B195', '#F67280',
+    '#C06C84', '#6C5B7B', '#355C7D', '#A8E6CE'
+];
 
-// ***** EVENTOS *****
+// Create modal for assignment results
+const modalHTML = `
+<div id="assignmentModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h3>Optimal Assignment</h3>
+        <div id="assignmentResults"></div>
+    </div>
+</div>
+`;
+document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+// Add modal styles
+const modalStyles = `
+.modal {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: #333;
+    border-radius: 8px;
+    padding: 15px;
+    color: white;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    max-width: 300px;
+}
+
+.modal-content {
+    position: relative;
+}
+
+.close-modal {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: #B2A1FF;
+}
+
+#assignmentResults {
+    margin-top: 10px;
+}
+
+.assignment-item {
+    margin: 5px 0;
+    padding: 5px;
+    border-bottom: 1px solid #444;
+}
+
+.total-cost {
+    margin-top: 10px;
+    font-weight: bold;
+    padding-top: 5px;
+    border-top: 2px solid #B2A1FF;
+}
+`;
+const styleElement = document.createElement('style');
+styleElement.innerHTML = modalStyles;
+document.head.appendChild(styleElement);
+
+// Event Handlers
 network.on("hoverEdge", function(params) {
     selectedEdgeId = params.edge;
     const pointer = params.pointer.DOM;
@@ -84,7 +150,7 @@ network.on("blurEdge", function() {
     edgeButtonTimeout = setTimeout(() => {
         edgeContextButton.style.display = 'none';
         selectedEdgeId = null;
-    }, 900); // Tiempo (ms) antes de desaparecer
+    }, 900);
 });
 
 edgeContextButton.addEventListener('mouseenter', function() {
@@ -124,7 +190,6 @@ changeWeightBtn.addEventListener('click', function() {
     }
 });
 
-// Agregar Nodo
 network.on("click", function(params) {
     if (params.nodes.length === 0 && params.edges.length === 0) {
         const pointerPosition = params.pointer.canvas;
@@ -136,36 +201,30 @@ network.on("click", function(params) {
             y: pointerPosition.y,
         });
         updateAdjacencyMatrix();
-        console.log(`Nodo ${newNodeId} creado.`);
     }
 });
 
-// Crear arco
 network.on('doubleClick', function(params) {
     if (params.nodes.length === 1) {
         if (!isCreatingEdge) {
             sourceNodeId = params.nodes[0];
             isCreatingEdge = true;
-            console.log(`Creando un arco con origen en Nodo ${sourceNodeId}`);
         } else {
             const destinationNodeId = params.nodes[0];
             
             if (sourceNodeId !== destinationNodeId) {
-                // Ver si es necesario controlar varios arcos entre nodos
                 if (!allowsCycles() && edgeExists(sourceNodeId, destinationNodeId)) {
                     alert('No se permiten múltiples aristas entre nodos en este modo de algoritmo');
                 } else {
                     edges.add({
                         from: sourceNodeId,
                         to: destinationNodeId,
-                        label: "0", // Por defecto
+                        label: "0",
                         arrows: 'to',
                     });
                     updateAdjacencyMatrix();
-                    console.log(`Arco creado desde Nodo ${sourceNodeId} hacia ${destinationNodeId}`);
                 }
             } else {
-                // Controlar Bucles
                 if (allowsCycles()) {
                     edges.add({
                         from: sourceNodeId,
@@ -184,7 +243,6 @@ network.on('doubleClick', function(params) {
     }
 });
 
-// Menú desplegable
 network.on('oncontext', function(params) {
     params.event.preventDefault();
 
@@ -204,8 +262,6 @@ network.on('oncontext', function(params) {
     nodeContextMenu.style.top = pointer.y + 'px';
 });
 
-
-// Agregar Bucle
 addLoopBtn.addEventListener('click', function() {
     if (selectedNodeId) {
         if (allowsCycles()) {
@@ -223,7 +279,6 @@ addLoopBtn.addEventListener('click', function() {
     }
 });
 
-// Cambiar Nombre
 changeLabelBtn.addEventListener('click', function() {
     if (selectedNodeId) {
         const newLabel = prompt('Ingresar nuevo nombre:', graph.getNode(selectedNodeId).label);
@@ -235,14 +290,12 @@ changeLabelBtn.addEventListener('click', function() {
     }
 });
 
-// Cambiar color
 nodeColorPicker.addEventListener('input', function(e) {
     if (selectedNodeId) {
         graph.updateNode(selectedNodeId, { color: e.target.value });
     }
 });
 
-// Borrar Nodo
 deleteNodeBtn.addEventListener('click', function() {
     if (selectedNodeId) {
         graph.removeNode(selectedNodeId);
@@ -251,7 +304,6 @@ deleteNodeBtn.addEventListener('click', function() {
     }
 });
 
-// ***** Botones de Control *****
 vaciarBtn.addEventListener('click', function() {
     graph.clear();
     updateAdjacencyMatrix();
@@ -299,7 +351,6 @@ document.getElementById('archivo').addEventListener('change', function(e) {
                 throw new Error("Invalid graph file format");
             }
             
-            // Verificar que el grafo importado cumpla con restricciones
             if (!allowsCycles()) {
                 const edgeMap = new Map();
                 for (const edge of graphData.edges) {
@@ -321,7 +372,6 @@ document.getElementById('archivo').addEventListener('change', function(e) {
                 label: edge.label || "0" 
             })));
             updateAdjacencyMatrix();
-            console.log('Grafo importado correctamente');
 
         } catch (error) {
             console.error('Error:', error);
@@ -332,7 +382,7 @@ document.getElementById('archivo').addEventListener('change', function(e) {
     e.target.value = '';
 });
 
-// ****** JOHNSON *****
+// Algorithm Implementations
 function calculateCriticalPath() {
     const nodeIds = nodes.getIds().sort((a, b) => a - b);
     const edgesList = edges.get();
@@ -455,7 +505,170 @@ function visualizeCriticalPath(results) {
     });
 }
 
-// RESOLVER
+function hungarianAlgorithm(isMaximization) {
+    const nodeIds = nodes.getIds().sort((a, b) => a - b);
+    const matrix = graph.getAdjacencyMatrix();
+    
+    if (nodeIds.length === 0) {
+        throw new Error("No hay nodos en el grafo");
+    }
+
+    // Separate origins (first half) and destinations (second half)
+    const half = Math.ceil(nodeIds.length / 2);
+    const origins = nodeIds.slice(0, half);
+    const destinations = nodeIds.slice(half);
+    
+    // Create cost matrix with destinations as rows and origins as columns
+    const costMatrix = destinations.map(toId => {
+        const toIndex = nodeIds.indexOf(toId);
+        return origins.map(fromId => {
+            const fromIndex = nodeIds.indexOf(fromId);
+            const cost = parseInt(matrix[fromIndex][toIndex]) || 0;
+            return isMaximization ? -cost : cost; // Handle maximization by negating costs
+        });
+    });
+
+    // Pad matrix to make it square if needed
+    const maxSize = Math.max(origins.length, destinations.length);
+    while (costMatrix.length < maxSize) {
+        costMatrix.push(new Array(origins.length).fill(0));
+    }
+    costMatrix.forEach(row => {
+        while (row.length < origins.length) {
+            row.push(0);
+        }
+    });
+
+    // Step 1: Subtract row minima
+    costMatrix.forEach(row => {
+        const min = Math.min(...row);
+        row.forEach((val, j) => {
+            row[j] = val - min;
+        });
+    });
+
+    // Step 2: Subtract column minima
+    for (let j = 0; j < origins.length; j++) {
+        const column = costMatrix.map(row => row[j]);
+        const min = Math.min(...column);
+        costMatrix.forEach(row => {
+            row[j] -= min;
+        });
+    }
+
+    // Find optimal assignment (now assigning destinations to origins)
+    const assignment = findOptimalAssignment(costMatrix);
+
+    // Prepare results with proper costs
+    const assignments = [];
+    let totalCost = 0;
+
+    for (let destIndex = 0; destIndex < Math.min(destinations.length, origins.length); destIndex++) {
+        const originIndex = assignment[destIndex];
+        if (originIndex === undefined || originIndex >= origins.length) continue;
+
+        const fromId = origins[originIndex];
+        const toId = destinations[destIndex];
+        const fromNode = nodes.get(fromId);
+        const toNode = nodes.get(toId);
+        
+        // Get original cost from adjacency matrix
+        const fromIndex = nodeIds.indexOf(fromId);
+        const toIndex = nodeIds.indexOf(toId);
+        const originalCost = parseInt(matrix[fromIndex][toIndex]) || 0;
+
+        assignments.push({
+            from: fromId,
+            fromLabel: fromNode.label,
+            to: toId,
+            toLabel: toNode.label,
+            cost: originalCost
+        });
+
+        totalCost += originalCost;
+    }
+
+    return { assignments, totalCost };
+}
+
+function findOptimalAssignment(matrix) {
+    const numRows = matrix.length;
+    const numCols = matrix[0]?.length || 0;
+    const assignment = new Array(numRows).fill(-1);
+    const rowCovered = new Array(numRows).fill(false);
+    const colCovered = new Array(numCols).fill(false);
+    
+    // Find initial assignments
+    for (let i = 0; i < numRows; i++) {
+        for (let j = 0; j < numCols; j++) {
+            if (matrix[i][j] === 0 && !rowCovered[i] && !colCovered[j]) {
+                assignment[i] = j;
+                rowCovered[i] = true;
+                colCovered[j] = true;
+                break;
+            }
+        }
+    }
+    
+    // Handle unassigned rows
+    for (let i = 0; i < numRows; i++) {
+        if (assignment[i] === -1) {
+            for (let j = 0; j < numCols; j++) {
+                if (!colCovered[j]) {
+                    assignment[i] = j;
+                    colCovered[j] = true;
+                    break;
+                }
+            }
+        }
+    }
+    
+    return assignment;
+}
+
+function visualizeAssignments(results) {
+    const { assignments, totalCost } = results;
+    
+    // Reset all node colors
+    nodes.get().forEach(node => {
+        nodes.update({
+            id: node.id,
+            color: '#00E3C6'
+        });
+    });
+
+    // Color assigned pairs
+    assignments.forEach((pair, index) => {
+        const color = colorPalette[index % colorPalette.length];
+        nodes.update([
+            { id: pair.from, color: color },
+            { id: pair.to, color: color }
+        ]);
+    });
+
+    // Show results in modal
+    const modal = document.getElementById('assignmentModal');
+    const resultsDiv = document.getElementById('assignmentResults');
+    
+    resultsDiv.innerHTML = assignments.map(pair => {
+        return `
+            <div class="assignment-item">
+                ${pair.fromLabel} → ${pair.toLabel} = ${pair.cost}
+            </div>
+        `;
+    }).join('') + `
+        <div class="total-cost">
+            Total Cost = ${isNaN(totalCost) ? 0 : totalCost}
+        </div>
+    `;
+    
+    modal.style.display = 'block';
+    
+    document.querySelector('.close-modal').onclick = function() {
+        modal.style.display = 'none';
+    };
+}
+
 solve_btn.addEventListener('click', function() {
     const selectedAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
     
@@ -466,8 +679,15 @@ solve_btn.addEventListener('click', function() {
         } catch (error) {
             alert("Error calculating critical path: " + error.message);
         }
+    } else if (selectedAlgorithm === 'Asignacion') {
+        try {
+            const isMaximization = document.querySelector('input[name="check"]:checked').value === 'true';
+            const results = hungarianAlgorithm(isMaximization);
+            visualizeAssignments(results);
+        } catch (error) {
+            alert("Error in assignment algorithm: " + error.message);
+        }
     } else if (selectedAlgorithm === 'grafo') {
-        // Resetear
         nodes.get().forEach(node => {
             nodes.update({
                 id: node.id,
@@ -484,25 +704,12 @@ solve_btn.addEventListener('click', function() {
                 label: edge.label.split(' | ')[0]
             });
         });
+        
+        document.getElementById('assignmentModal').style.display = 'none';
     }
-    // 
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-updateAdjacencyMatrix();
-
+// Helper Functions
 function updateAdjacencyMatrix() {
     const matrix = graph.getAdjacencyMatrix();
     const nodeIds = nodes.getIds().sort((a, b) => a - b);
@@ -511,7 +718,6 @@ function updateAdjacencyMatrix() {
     table.innerHTML = '';
     
     const headerRow = document.createElement('tr');
-    
     const cornerCell = document.createElement('th');
     cornerCell.className = 'empty-corner';
     headerRow.appendChild(cornerCell);
@@ -543,8 +749,6 @@ function updateAdjacencyMatrix() {
     });
 }
 
-
-// Ver si ya existe un arco entre nodos
 function edgeExists(from, to) {
     return edges.get().some(edge => 
         (edge.from === from && edge.to === to) || 
@@ -552,13 +756,11 @@ function edgeExists(from, to) {
     );
 }
 
-// Ver si la opción actual admite ciclos
 function allowsCycles() {
     const selectedAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
     return selectedAlgorithm === 'grafo';
 }
 
-// Cambios de selección de algoritmos
 function handleAlgorithmChange() {
     const selectedAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
     document.getElementById('currentAlgorithm').textContent = `Actual: ${
@@ -570,7 +772,6 @@ function handleAlgorithmChange() {
     graph.clear();
     updateAdjacencyMatrix();
     
-    // Ocultar/mostrar controles adicionales
     const checkboxGroup = document.getElementById('checkboxGroup1');
     if (selectedAlgorithm === 'Asignacion' || selectedAlgorithm === 'noroeste') {
         checkboxGroup.classList.remove('hidden');
@@ -579,21 +780,12 @@ function handleAlgorithmChange() {
     }
 }
 
-
-const currentAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
-console.log('Current algorithm:', currentAlgorithm);
-
-
-// Eventos para los Radio Buttons
 document.querySelectorAll('input[name="algorithm"]').forEach(radio => {
     radio.addEventListener('change', handleAlgorithmChange);
 });
 
-// Inicializar el display del algoritmo
 handleAlgorithmChange();
 
-
-// Funciones Generales
 container.addEventListener('contextmenu', function(e) {
     e.preventDefault();
 });
