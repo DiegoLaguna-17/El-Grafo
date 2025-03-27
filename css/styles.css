@@ -1,3 +1,127 @@
+#network {
+    width: 100%;
+    height: 600px; 
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+}
+
+
+/* Edge context button styling */
+.edge-context-button {
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.edge-context-button:hover {
+    transform: scale(1.1);
+}
+
+.edge-context-button button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Edge label styling  */
+.vis-edge .vis-label {
+    cursor: pointer;
+    pointer-events: all;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.vis-edge .vis-label:hover {
+    background-color: #e3f2fd;
+    border-color: #90caf9;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Adjacency Matrix Styles */
+.matriz-container {
+    background-color: #333;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.matriz-container h1 {
+    color: #B2A1FF;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.matriz-scroll {
+    overflow-x: auto;
+    max-width: 100%;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background-color: #222;
+}
+
+.matriz {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.matriz th, .matriz td {
+    border: 1px solid #444;
+    padding: 10px;
+    color: white;
+    min-width: 40px;
+}
+
+.matriz th {
+    background-color: #B2A1FF;
+    color: #222;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+}
+
+.matriz th:first-child {
+    background-color: #A4F5A6;
+}
+
+.matriz td {
+    background-color: #333;
+}
+
+.matriz tr:hover td {
+    background-color: #444;
+}
+
+.empty-corner {
+    background-color: #A4F5A6 !important;
+}
+
+
+
+
+
+
 * {
     margin: 0;
     padding: 0;
@@ -59,6 +183,7 @@ body {
 }
 
 .settings-header {
+    margin-top: 10vh;
     text-align: center;
 }
 
@@ -125,17 +250,6 @@ body {
     margin-left: 0; 
 }
 
-.svg-container {
-    height: 80vh; 
-    background-color: #f4d9ff;
-    border: 1vh solid black;
-}
-
-svg {
-    width: 100%;
-    height: 100%;
-}
-
 .controls {
     display: flex;
     justify-content: center;
@@ -159,66 +273,34 @@ svg {
     background-color: #9c8aff;
 }
 
-.matriz-container {
-    text-align: center;
-    flex-grow: 1; 
-    display: flex;
-    flex-direction: column;
-    color: white;
-}
-
-.matriz-scroll {
-    overflow-y: auto; 
-    max-height: 40vh; 
+.context-menu {
+    background: white;
     border: 1px solid #ccc;
-    margin-top: 10px;
-}
-
-.matriz {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: center;
-}
-
-.matriz th, .matriz td {
-    border: 1px solid white;
-    padding: 10px;
-}
-
-#menu {
-    display: none; 
-    position: absolute; 
-    background-color: #222222; 
-    border: 1px solid #444444; 
-    border-radius: 8px; 
-    padding: 10px; 
-    z-index: 1000; 
-}
-
-#menu button,
-#menu input[type="color"] {
-    display: block; 
-    width: 100%; 
-    padding: 10px; 
-    margin: 5px 0;
-    background-color: #333333; 
-    color: white; 
-    border: none; 
-    border-radius: 5px; 
-    font-family: Verdana, Geneva, Tahoma, sans-serif; 
-    font-size: 14px; 
-    cursor: pointer; 
-    transition: background-color 0.3s;
-}
-
-#menu button:hover,
-#menu input[type="color"]:hover {
-    background-color: #444444; 
-}
-
-#menu input[type="color"] {
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    z-index: 1000;
     padding: 5px;
-    height: 40px; 
+    border-radius: 4px;
+}
+
+.context-menu button {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.context-menu button:hover {
+    background-color: #f0f0f0;
+}
+
+.context-menu input[type="color"] {
+    width: 100%;
+    margin: 5px 0;
+    border: none;
+    height: 30px;
 }
 
 .radio-button {
@@ -240,50 +322,6 @@ svg {
 .radio-button input[type="radio"]:checked + .radio-label {
     font-weight: bold;
     color: #0059b8;
-}
-
-.modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 20px;
-    border: 1px solid black;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    max-width: 90%;
-    overflow-x: auto;
-}
-
-.modal table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: center;
-}
-
-.modal th, .modal td {
-    border: 1px solid black;
-    padding: 10px;
-}
-
-.modal th {
-    background-color: #f2f2f2;
-}
-
-.modal button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.modal button:hover {
-    background-color: #0056b3;
 }
 
 #currentAlgorithm {
