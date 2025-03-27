@@ -70,7 +70,7 @@ const modalHTML = `
 <div id="assignmentModal" class="modal" style="display: none;">
     <div class="modal-content">
         <span class="close-modal">&times;</span>
-        <h3>Optimal Assignment</h3>
+        <h3>Resultado Asignación</h3>
         <div id="assignmentResults"></div>
     </div>
 </div>
@@ -658,7 +658,7 @@ function visualizeAssignments(results) {
         `;
     }).join('') + `
         <div class="total-cost">
-            Total Cost = ${isNaN(totalCost) ? 0 : totalCost}
+            Costo Total = ${isNaN(totalCost) ? 0 : totalCost}
         </div>
     `;
     
@@ -669,6 +669,118 @@ function visualizeAssignments(results) {
     };
 }
 
+// Add Northwest Corner modal HTML
+const northwestModalHTML = `
+<div id="northwestModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-northwest-modal">&times;</span>
+        <h3>Resultado Noroeste</h3>
+        <div id="northwestResults">
+            <p>Iteraciones: <span id="iterationCount">0</span></p>
+            <p>Costo total = <span id="northwestTotalCost">0</span></p>
+        </div>
+    </div>
+</div>
+`;
+document.body.insertAdjacentHTML('beforeend', northwestModalHTML);
+
+// Northwest Corner Algorithm Implementation
+function northwestCornerAlgorithm(isMaximization) {
+    const nodeIds = nodes.getIds().sort((a, b) => a - b);
+    const matrix = graph.getAdjacencyMatrix();
+    
+    if (nodeIds.length === 0) {
+        throw new Error("No hay nodos en el grafo");
+    }
+
+    // Separate origins (first half) and destinations (second half)
+    const half = Math.ceil(nodeIds.length / 2);
+    const origins = nodeIds.slice(0, half);
+    const destinations = nodeIds.slice(half);
+    
+    // Parse supply (offer) and demand values from node labels
+    const supplies = origins.map(id => {
+        const node = nodes.get(id);
+        return parseInt(node.label.replace(/\D/g, '')) || 0;
+    });
+    
+    const demands = destinations.map(id => {
+        const node = nodes.get(id);
+        return parseInt(node.label.replace(/\D/g, '')) || 0;
+    });
+
+    // Create cost matrix with origins as rows and destinations as columns
+    const costMatrix = origins.map((fromId, i) => {
+        const fromIndex = nodeIds.indexOf(fromId);
+        return destinations.map((toId, j) => {
+            const toIndex = nodeIds.indexOf(toId);
+            return parseInt(matrix[fromIndex][toIndex]) || 0;
+        });
+    });
+
+    // Initialize variables
+    const allocations = Array(origins.length).fill().map(() => Array(destinations.length).fill(0));
+    let totalCost = 0;
+    let iterations = 0;
+    let i = 0, j = 0;
+
+    // Northwest Corner algorithm
+    while (i < origins.length && j < destinations.length) {
+        iterations++;
+        const supply = supplies[i];
+        const demand = demands[j];
+        
+        const allocation = Math.min(supply, demand);
+        allocations[i][j] = allocation;
+        
+        // Update supply and demand
+        supplies[i] -= allocation;
+        demands[j] -= allocation;
+        
+        // Calculate cost (adjust for maximization if needed)
+        const cost = isMaximization ? -costMatrix[i][j] : costMatrix[i][j];
+        totalCost += allocation * costMatrix[i][j];
+        
+        // Move to next cell
+        if (supplies[i] === 0) {
+            i++;
+        }
+        if (demands[j] === 0) {
+            j++;
+        }
+    }
+
+    return {
+        allocations,
+        totalCost: isMaximization ? -totalCost : totalCost,
+        iterations
+    };
+}
+
+function visualizeNorthwestResults(results) {
+    const { totalCost, iterations } = results;
+    
+    // Color all nodes orange to indicate algorithm was applied
+    nodes.get().forEach(node => {
+        nodes.update({
+            id: node.id,
+            color: '#FF6800'
+        });
+    });
+
+    // Show results in modal
+    const modal = document.getElementById('northwestModal');
+    document.getElementById('iterationCount').textContent = iterations;
+    document.getElementById('northwestTotalCost').textContent = totalCost;
+    
+    modal.style.display = 'block';
+    
+    document.querySelector('.close-northwest-modal').onclick = function() {
+        modal.style.display = 'none';
+    };
+}
+
+// Update solve button handler to include Northwest algorithm
 solve_btn.addEventListener('click', function() {
     const selectedAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
     
@@ -686,6 +798,14 @@ solve_btn.addEventListener('click', function() {
             visualizeAssignments(results);
         } catch (error) {
             alert("Error in assignment algorithm: " + error.message);
+        }
+    } else if (selectedAlgorithm === 'noroeste') {
+        try {
+            const isMaximization = document.querySelector('input[name="check"]:checked').value === 'true';
+            const results = northwestCornerAlgorithm(isMaximization);
+            visualizeNorthwestResults(results);
+        } catch (error) {
+            alert("Error in Northwest algorithm: " + error.message);
         }
     } else if (selectedAlgorithm === 'grafo') {
         nodes.get().forEach(node => {
@@ -706,6 +826,7 @@ solve_btn.addEventListener('click', function() {
         });
         
         document.getElementById('assignmentModal').style.display = 'none';
+        document.getElementById('northwestModal').style.display = 'none';
     }
 });
 
