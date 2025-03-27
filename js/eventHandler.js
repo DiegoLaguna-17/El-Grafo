@@ -332,9 +332,173 @@ document.getElementById('archivo').addEventListener('change', function(e) {
     e.target.value = '';
 });
 
+// ****** JOHNSON *****
+function calculateCriticalPath() {
+    const nodeIds = nodes.getIds().sort((a, b) => a - b);
+    const edgesList = edges.get();
+    
+    const forwardPass = {};
+    const backwardPass = {};
+    const slack = {};
+    const criticalPath = [];
+    
+    nodeIds.forEach(id => {
+        forwardPass[id] = 0;
+        backwardPass[id] = Infinity;
+    });
+    
+    const sortedNodes = topologicalSort(nodeIds, edgesList);
+    sortedNodes.forEach(nodeId => {
+        edgesList
+            .filter(edge => edge.from === nodeId)
+            .forEach(edge => {
+                const weight = parseInt(edge.label) || 0;
+                forwardPass[edge.to] = Math.max(
+                    forwardPass[edge.to], 
+                    forwardPass[nodeId] + weight
+                );
+            });
+    });
+    
+    const lastNode = sortedNodes[sortedNodes.length - 1];
+    backwardPass[lastNode] = forwardPass[lastNode];
+    
+    [...sortedNodes].reverse().forEach(nodeId => {
+        edgesList
+            .filter(edge => edge.to === nodeId)
+            .forEach(edge => {
+                const weight = parseInt(edge.label) || 0;
+                backwardPass[edge.from] = Math.min(
+                    backwardPass[edge.from],
+                    backwardPass[nodeId] - weight
+                );
+            });
+    });
+    
+    edgesList.forEach(edge => {
+        const weight = parseInt(edge.label) || 0;
+        slack[edge.id] = backwardPass[edge.to] - forwardPass[edge.from] - weight;
+        
+        if (slack[edge.id] === 0) {
+            criticalPath.push(edge.id);
+        }
+    });
+    
+    return {
+        forwardPass,
+        backwardPass,
+        slack,
+        criticalPath
+    };
+}
+
+function topologicalSort(nodeIds, edgesList) {
+    const visited = new Set();
+    const temp = new Set();
+    const result = [];
+    
+    function visit(nodeId) {
+        if (temp.has(nodeId)) throw new Error("Graph has cycles");
+        if (visited.has(nodeId)) return;
+        
+        temp.add(nodeId);
+        
+        edgesList
+            .filter(edge => edge.from === nodeId)
+            .forEach(edge => visit(edge.to));
+            
+        temp.delete(nodeId);
+        visited.add(nodeId);
+        result.unshift(nodeId);
+    }
+    
+    nodeIds.forEach(id => {
+        if (!visited.has(id)) visit(id);
+    });
+    
+    return result;
+}
+
+function visualizeCriticalPath(results) {
+    const { forwardPass, backwardPass, slack, criticalPath } = results;
+    
+    const criticalNodes = new Set();
+    edges.get(criticalPath).forEach(edge => {
+        criticalNodes.add(edge.from);
+        criticalNodes.add(edge.to);
+    });
+    
+    nodes.get().forEach(node => {
+        const isCritical = criticalNodes.has(node.id);
+        nodes.update({
+            id: node.id,
+            color: isCritical ? '#E8FF00' : '#00E3C6',
+            label: `${node.label}\n${forwardPass[node.id]} | ${backwardPass[node.id]}`
+        });
+    });
+    
+    edges.get().forEach(edge => {
+        const weight = edge.label || "0";
+        edges.update({
+            id: edge.id,
+            label: `${weight} | h = ${slack[edge.id]}`
+        });
+    });
+    
+    edges.get().forEach(edge => {
+        const isCritical = criticalPath.includes(edge.id);
+        edges.update({
+            id: edge.id,
+            color: isCritical ? '#E8FF00' : '#000000',
+            width: isCritical ? 3 : 2
+        });
+    });
+}
+
+// RESOLVER
 solve_btn.addEventListener('click', function() {
-    //
+    const selectedAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
+    
+    if (selectedAlgorithm === 'cpm') {
+        try {
+            const results = calculateCriticalPath();
+            visualizeCriticalPath(results);
+        } catch (error) {
+            alert("Error calculating critical path: " + error.message);
+        }
+    } else if (selectedAlgorithm === 'grafo') {
+        // Resetear
+        nodes.get().forEach(node => {
+            nodes.update({
+                id: node.id,
+                color: '#00E3C6',
+                label: node.label.split('\n')[0]
+            });
+        });
+        
+        edges.get().forEach(edge => {
+            edges.update({
+                id: edge.id,
+                color: '#000000',
+                width: 2,
+                label: edge.label.split(' | ')[0]
+            });
+        });
+    }
+    // 
 });
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 updateAdjacencyMatrix();
