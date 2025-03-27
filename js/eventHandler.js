@@ -117,6 +117,7 @@ changeWeightBtn.addEventListener('click', function() {
                 id: selectedEdgeId,
                 label: newWeight
             });
+            updateAdjacencyMatrix();
         }
         edgeContextButton.style.display = 'none';
         selectedEdgeId = null;
@@ -134,6 +135,7 @@ network.on("click", function(params) {
             x: pointerPosition.x,
             y: pointerPosition.y,
         });
+        updateAdjacencyMatrix();
         console.log(`Nodo ${newNodeId} creado.`);
     }
 });
@@ -154,6 +156,7 @@ network.on('doubleClick', function(params) {
                     label: "0", // Por defecto
                     arrows: 'to',
                 });
+                updateAdjacencyMatrix();
                 console.log(`Arco creado desde Nodo ${sourceNodeId} hacia ${destinationNodeId}`);
             } else {
                 console.log('No se pueden crear bucles ahora.');
@@ -194,6 +197,7 @@ addLoopBtn.addEventListener('click', function() {
             label: '0',
             arrows: 'to'
         });
+        updateAdjacencyMatrix();
         nodeContextMenu.style.display = 'none';
     }
 });
@@ -206,6 +210,7 @@ changeLabelBtn.addEventListener('click', function() {
             graph.updateNode(selectedNodeId, { label: newLabel });
         }
         nodeContextMenu.style.display = 'none';
+        updateAdjacencyMatrix();
     }
 });
 
@@ -221,12 +226,14 @@ deleteNodeBtn.addEventListener('click', function() {
     if (selectedNodeId) {
         graph.removeNode(selectedNodeId);
         nodeContextMenu.style.display = 'none';
+        updateAdjacencyMatrix();
     }
 });
 
 // ***** Botones de Control *****
 vaciarBtn.addEventListener('click', function() {
     graph.clear();
+    updateAdjacencyMatrix();
 });
 
 guardarGrafo.addEventListener('click', function() {
@@ -277,7 +284,7 @@ document.getElementById('archivo').addEventListener('change', function(e) {
                 ...edge,
                 label: edge.label || "0" 
             })));
-            
+            updateAdjacencyMatrix();
             console.log('Graph imported successfully');
 
         } catch (error) {
@@ -290,8 +297,63 @@ document.getElementById('archivo').addEventListener('change', function(e) {
 });
 
 solve_btn.addEventListener('click', function() {
-    console.log('Current adjacency matrix:', graph.getAdjacencyMatrix());
+    //
 });
+
+
+updateAdjacencyMatrix();
+
+function updateAdjacencyMatrix() {
+    const matrix = graph.getAdjacencyMatrix();
+    const nodeIds = nodes.getIds().sort((a, b) => a - b);
+    const table = document.getElementById('tablaMatriz');
+    
+    // Clear existing table
+    table.innerHTML = '';
+    
+    // Create header row
+    const headerRow = document.createElement('tr');
+    
+    // Empty corner cell
+    const cornerCell = document.createElement('th');
+    cornerCell.className = 'empty-corner';
+    headerRow.appendChild(cornerCell);
+    
+    // Node headers
+    nodeIds.forEach(id => {
+        const node = nodes.get(id);
+        const th = document.createElement('th');
+        th.textContent = node.label || `Nodo ${id}`;
+        headerRow.appendChild(th);
+    });
+    
+    table.appendChild(headerRow);
+    
+    // Create matrix rows
+    nodeIds.forEach((id, rowIndex) => {
+        const row = document.createElement('tr');
+        const node = nodes.get(id);
+        
+        // Row header
+        const rowHeader = document.createElement('th');
+        rowHeader.textContent = node.label || `Nodo ${id}`;
+        row.appendChild(rowHeader);
+        
+        // Matrix values
+        nodeIds.forEach((_, colIndex) => {
+            const td = document.createElement('td');
+            td.textContent = matrix[rowIndex][colIndex];
+            row.appendChild(td);
+        });
+        
+        table.appendChild(row);
+    });
+}
+
+
+
+
+
 
 const currentAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
 console.log('Current algorithm:', currentAlgorithm);
