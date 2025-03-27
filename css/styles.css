@@ -40,9 +40,7 @@
     align-items: center;
 }
 
-
-
-/* Edge label styling - make sure this stays */
+/* Edge label styling  */
 .vis-edge .vis-label {
     cursor: pointer;
     pointer-events: all;
@@ -59,7 +57,6 @@
     border-color: #90caf9;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
-
 
 /* Adjacency Matrix Styles */
 .matriz-container {

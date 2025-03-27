@@ -84,7 +84,7 @@ network.on("blurEdge", function() {
     edgeButtonTimeout = setTimeout(() => {
         edgeContextButton.style.display = 'none';
         selectedEdgeId = null;
-    }, 600); // Tiempo (ms) antes de desaparecer
+    }, 900); // Tiempo (ms) antes de desaparecer
 });
 
 edgeContextButton.addEventListener('mouseenter', function() {
@@ -149,17 +149,34 @@ network.on('doubleClick', function(params) {
             console.log(`Creando un arco con origen en Nodo ${sourceNodeId}`);
         } else {
             const destinationNodeId = params.nodes[0];
+            
             if (sourceNodeId !== destinationNodeId) {
-                edges.add({
-                    from: sourceNodeId,
-                    to: destinationNodeId,
-                    label: "0", // Por defecto
-                    arrows: 'to',
-                });
-                updateAdjacencyMatrix();
-                console.log(`Arco creado desde Nodo ${sourceNodeId} hacia ${destinationNodeId}`);
+                // Ver si es necesario controlar varios arcos entre nodos
+                if (!allowsCycles() && edgeExists(sourceNodeId, destinationNodeId)) {
+                    alert('No se permiten múltiples aristas entre nodos en este modo de algoritmo');
+                } else {
+                    edges.add({
+                        from: sourceNodeId,
+                        to: destinationNodeId,
+                        label: "0", // Por defecto
+                        arrows: 'to',
+                    });
+                    updateAdjacencyMatrix();
+                    console.log(`Arco creado desde Nodo ${sourceNodeId} hacia ${destinationNodeId}`);
+                }
             } else {
-                console.log('No se pueden crear bucles ahora.');
+                // Controlar Bucles
+                if (allowsCycles()) {
+                    edges.add({
+                        from: sourceNodeId,
+                        to: destinationNodeId,
+                        label: '0',
+                        arrows: 'to',
+                    });
+                    updateAdjacencyMatrix();
+                } else {
+                    alert('No se permiten bucles en este modo de algoritmo');
+                }
             }
             isCreatingEdge = false;
             sourceNodeId = null;
@@ -191,13 +208,17 @@ network.on('oncontext', function(params) {
 // Agregar Bucle
 addLoopBtn.addEventListener('click', function() {
     if (selectedNodeId) {
-        edges.add({
-            from: selectedNodeId,
-            to: selectedNodeId,
-            label: '0',
-            arrows: 'to'
-        });
-        updateAdjacencyMatrix();
+        if (allowsCycles()) {
+            edges.add({
+                from: selectedNodeId,
+                to: selectedNodeId,
+                label: '0',
+                arrows: 'to'
+            });
+            updateAdjacencyMatrix();
+        } else {
+            alert('No se permiten bucles en este modo de algoritmo');
+        }
         nodeContextMenu.style.display = 'none';
     }
 });
@@ -277,19 +298,34 @@ document.getElementById('archivo').addEventListener('change', function(e) {
             if (!graphData.nodes || !graphData.edges) {
                 throw new Error("Invalid graph file format");
             }
-            graph.clear();
             
+            // Verificar que el grafo importado cumpla con restricciones
+            if (!allowsCycles()) {
+                const edgeMap = new Map();
+                for (const edge of graphData.edges) {
+                    const key = [edge.from, edge.to].sort().join('-');
+                    if (edge.from === edge.to) {
+                        throw new Error("El grafo importado contiene bucles, pero el algoritmo actual no los permite");
+                    }
+                    if (edgeMap.has(key)) {
+                        throw new Error("El grafo importado contiene múltiples aristas entre nodos, pero el algoritmo actual no las permite");
+                    }
+                    edgeMap.set(key, true);
+                }
+            }
+            
+            graph.clear();
             nodes.add(graphData.nodes);
             edges.add(graphData.edges.map(edge => ({
                 ...edge,
                 label: edge.label || "0" 
             })));
             updateAdjacencyMatrix();
-            console.log('Graph imported successfully');
+            console.log('Grafo importado correctamente');
 
         } catch (error) {
-            console.error('Error loading graph:', error);
-            alert('Error loading graph: ' + error.message);
+            console.error('Error:', error);
+            alert('Error: ' + error.message);
         }
     };
     reader.readAsText(file);
@@ -308,18 +344,14 @@ function updateAdjacencyMatrix() {
     const nodeIds = nodes.getIds().sort((a, b) => a - b);
     const table = document.getElementById('tablaMatriz');
     
-    // Clear existing table
     table.innerHTML = '';
     
-    // Create header row
     const headerRow = document.createElement('tr');
     
-    // Empty corner cell
     const cornerCell = document.createElement('th');
     cornerCell.className = 'empty-corner';
     headerRow.appendChild(cornerCell);
     
-    // Node headers
     nodeIds.forEach(id => {
         const node = nodes.get(id);
         const th = document.createElement('th');
@@ -329,17 +361,14 @@ function updateAdjacencyMatrix() {
     
     table.appendChild(headerRow);
     
-    // Create matrix rows
     nodeIds.forEach((id, rowIndex) => {
         const row = document.createElement('tr');
         const node = nodes.get(id);
         
-        // Row header
         const rowHeader = document.createElement('th');
         rowHeader.textContent = node.label || `Nodo ${id}`;
         row.appendChild(rowHeader);
         
-        // Matrix values
         nodeIds.forEach((_, colIndex) => {
             const td = document.createElement('td');
             td.textContent = matrix[rowIndex][colIndex];
@@ -351,12 +380,54 @@ function updateAdjacencyMatrix() {
 }
 
 
+// Ver si ya existe un arco entre nodos
+function edgeExists(from, to) {
+    return edges.get().some(edge => 
+        (edge.from === from && edge.to === to) || 
+        (edge.from === to && edge.to === from)
+    );
+}
 
+// Ver si la opción actual admite ciclos
+function allowsCycles() {
+    const selectedAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
+    return selectedAlgorithm === 'grafo';
+}
 
+// Cambios de selección de algoritmos
+function handleAlgorithmChange() {
+    const selectedAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
+    document.getElementById('currentAlgorithm').textContent = `Actual: ${
+        selectedAlgorithm === 'grafo' ? 'Grafo' :
+        selectedAlgorithm === 'cpm' ? 'Johnson' :
+        selectedAlgorithm === 'Asignacion' ? 'Asignación' : 'Noroeste'
+    }`;
+    
+    graph.clear();
+    updateAdjacencyMatrix();
+    
+    // Ocultar/mostrar controles adicionales
+    const checkboxGroup = document.getElementById('checkboxGroup1');
+    if (selectedAlgorithm === 'Asignacion' || selectedAlgorithm === 'noroeste') {
+        checkboxGroup.classList.remove('hidden');
+    } else {
+        checkboxGroup.classList.add('hidden');
+    }
+}
 
 
 const currentAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
 console.log('Current algorithm:', currentAlgorithm);
+
+
+// Eventos para los Radio Buttons
+document.querySelectorAll('input[name="algorithm"]').forEach(radio => {
+    radio.addEventListener('change', handleAlgorithmChange);
+});
+
+// Inicializar el display del algoritmo
+handleAlgorithmChange();
+
 
 // Funciones Generales
 container.addEventListener('contextmenu', function(e) {
