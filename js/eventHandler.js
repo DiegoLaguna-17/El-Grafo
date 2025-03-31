@@ -591,6 +591,10 @@ function visualizeCriticalPath(results) {
     };
 }
 
+
+
+
+
 function hungarianAlgorithm(isMaximization) {
     const nodeIds = nodes.getIds().sort((a, b) => a - b);
     const matrix = graph.getAdjacencyMatrix();
@@ -610,9 +614,179 @@ function hungarianAlgorithm(isMaximization) {
         return origins.map(fromId => {
             const fromIndex = nodeIds.indexOf(fromId);
             const cost = parseInt(matrix[fromIndex][toIndex]) || 0;
+            return isMaximization ? -cost : cost;
+        });
+    });
+    
+    console.log("Matriz de costos original:", costMatrix);
+
+    // Make the matrix square by adding dummy rows/columns with zero costs
+    const maxSize = Math.max(origins.length, destinations.length);
+    const paddedMatrix = [];
+    
+    for (let i = 0; i < maxSize; i++) {
+        const row = [];
+        for (let j = 0; j < maxSize; j++) {
+            if (i < costMatrix.length && j < costMatrix[0].length) {
+                row.push(costMatrix[i][j]);
+            } else {
+                row.push(0); // Dummy costs
+            }
+        }
+        paddedMatrix.push(row);
+    }
+
+    // Step 1: Subtract row minima
+    for (let i = 0; i < paddedMatrix.length; i++) {
+        const min = Math.min(...paddedMatrix[i]);
+        for (let j = 0; j < paddedMatrix[i].length; j++) {
+            paddedMatrix[i][j] -= min;
+        }
+    }
+
+    // Step 2: Subtract column minima
+    for (let j = 0; j < paddedMatrix[0].length; j++) {
+        let min = Infinity;
+        for (let i = 0; i < paddedMatrix.length; i++) {
+            if (paddedMatrix[i][j] < min) {
+                min = paddedMatrix[i][j];
+            }
+        }
+        for (let i = 0; i < paddedMatrix.length; i++) {
+            paddedMatrix[i][j] -= min;
+        }
+    }
+
+    // Find optimal assignment using a proper Hungarian algorithm implementation
+    const assignment = hungarianAssignment(paddedMatrix);
+
+    // Prepare results with proper costs
+    const assignments = [];
+    let totalCost = 0;
+
+    for (let destIndex = 0; destIndex < destinations.length; destIndex++) {
+        const originIndex = assignment[destIndex];
+        if (originIndex === undefined || originIndex >= origins.length) continue;
+
+        const fromId = origins[originIndex];
+        const toId = destinations[destIndex];
+        const fromNode = nodes.get(fromId);
+        const toNode = nodes.get(toId);
+        
+        const fromIndex = nodeIds.indexOf(fromId);
+        const toIndex = nodeIds.indexOf(toId);
+        const originalCost = parseInt(matrix[fromIndex][toIndex]) || 0;
+
+        assignments.push({
+            from: fromId,
+            fromLabel: fromNode.label,
+            to: toId,
+            toLabel: toNode.label,
+            cost: originalCost
+        });
+
+        totalCost += originalCost;
+    }
+
+    return { assignments, totalCost };
+}
+
+// Implementación completa del algoritmo húngaro para asignación
+function hungarianAssignment(costMatrix) {
+    const n = costMatrix.length;
+    const m = costMatrix[0].length;
+    
+    // Inicializar matrices de seguimiento
+    const u = new Array(n + 1).fill(0);
+    const v = new Array(m + 1).fill(0);
+    const p = new Array(m + 1).fill(0);
+    const way = new Array(m + 1).fill(0);
+    
+    for (let i = 1; i <= n; i++) {
+        p[0] = i;
+        let j0 = 0;
+        const minv = new Array(m + 1).fill(Infinity);
+        const used = new Array(m + 1).fill(false);
+        
+        do {
+            used[j0] = true;
+            const i0 = p[j0];
+            let delta = Infinity;
+            let j1 = 0;
+            
+            for (let j = 1; j <= m; j++) {
+                if (!used[j]) {
+                    const cur = costMatrix[i0 - 1][j - 1] - u[i0] - v[j];
+                    if (cur < minv[j]) {
+                        minv[j] = cur;
+                        way[j] = j0;
+                    }
+                    if (minv[j] < delta) {
+                        delta = minv[j];
+                        j1 = j;
+                    }
+                }
+            }
+            
+            for (let j = 0; j <= m; j++) {
+                if (used[j]) {
+                    u[p[j]] += delta;
+                    v[j] -= delta;
+                } else {
+                    minv[j] -= delta;
+                }
+            }
+            
+            j0 = j1;
+        } while (p[j0] !== 0);
+        
+        do {
+            const j1 = way[j0];
+            p[j0] = p[j1];
+            j0 = j1;
+        } while (j0 !== 0);
+    }
+    
+    // Construir la asignación
+    const assignment = new Array(n).fill(-1);
+    for (let j = 1; j <= m; j++) {
+        if (p[j] > 0) {
+            assignment[p[j] - 1] = j - 1;
+        }
+    }
+    
+    return assignment;
+}
+
+
+
+/*
+function hungarianAlgorithm(isMaximization) {
+    const nodeIds = nodes.getIds().sort((a, b) => a - b);
+    const matrix = graph.getAdjacencyMatrix();
+    
+    if (nodeIds.length === 0) {
+        throw new Error("No hay nodos en el grafo");
+    }
+
+    // Separate origins (first half) and destinations (second half)
+    const half = Math.ceil(nodeIds.length / 2);
+    const origins = nodeIds.slice(0, half);
+    const destinations = nodeIds.slice(half);
+    
+    // Create cost matrix with destinations as rows and origins as columns
+    console.log(matrix);
+    const costMatrix = destinations.map(toId => {
+        const toIndex = nodeIds.indexOf(toId);
+        return origins.map(fromId => {
+            const fromIndex = nodeIds.indexOf(fromId);
+            const cost = parseInt(matrix[fromIndex][toIndex]) || 0;
             return isMaximization ? -cost : cost; // Handle maximization by negating costs
         });
     });
+    
+    
+    console.log(costMatrix);
 
     // Pad matrix to make it square if needed
     const maxSize = Math.max(origins.length, destinations.length);
@@ -711,7 +885,7 @@ function findOptimalAssignment(matrix) {
     
     return assignment;
 }
-
+*/
 function visualizeAssignments(results) {
     const { assignments, totalCost } = results;
     
