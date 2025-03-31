@@ -694,6 +694,7 @@ const northwestModalHTML = `
 document.body.insertAdjacentHTML('beforeend', northwestModalHTML);
 
 // Northwest Corner Algorithm Implementation
+// Northwest Corner Algorithm Implementation
 function northwestCornerAlgorithm(isMaximization) {
     const nodeIds = nodes.getIds().sort((a, b) => a - b);
     const matrix = graph.getAdjacencyMatrix();
@@ -733,7 +734,7 @@ function northwestCornerAlgorithm(isMaximization) {
         return demandNodes.map((toId, j) => {
             const toIndex = nodeIds.indexOf(toId);
             const cost = parseInt(matrix[fromIndex][toIndex]) || 0;
-            return isMaximization ? -cost : cost; // Handle maximization by negating costs
+            return cost; // Always use original cost, we'll handle maximization differently
         });
     });
 
@@ -743,58 +744,76 @@ function northwestCornerAlgorithm(isMaximization) {
     let iterations = 0;
     let i = 0, j = 0;
 
-    // Northwest Corner algorithm
-    while (i < supplyNodes.length && j < demandNodes.length) {
-        iterations++;
-        const supply = supplies[i];
-        const demand = demands[j];
-        
-        if (supply <= 0 || demand <= 0) {
-            // Skip if no supply or demand left
-            if (supply <= 0) i++;
-            if (demand <= 0) j++;
-            continue;
+    // For maximization, we need to find the maximum possible total cost
+    if (isMaximization) {
+        // Create a copy of the cost matrix sorted in descending order
+        const sortedCosts = [];
+        for (let i = 0; i < supplyNodes.length; i++) {
+            for (let j = 0; j < demandNodes.length; j++) {
+                sortedCosts.push({
+                    i, j,
+                    cost: costMatrix[i][j]
+                });
+            }
         }
+        sortedCosts.sort((a, b) => b.cost - a.cost); // Sort descending
         
-        const allocation = Math.min(supply, demand);
-        allocations[i][j] = allocation;
+        // Make copies of supplies and demands that we can modify
+        const remainingSupplies = [...supplies];
+        const remainingDemands = [...demands];
         
-        // Update supply and demand
-        supplies[i] -= allocation;
-        demands[j] -= allocation;
-        
-        // Calculate cost (using original cost, not the negated one for maximization)
-        const originalCost = parseInt(matrix[nodeIds.indexOf(supplyNodes[i])][nodeIds.indexOf(demandNodes[j])]) || 0;
-        totalCost += allocation * originalCost;
-        
-        // Move to next cell
-        if (supplies[i] === 0) i++;
-        if (demands[j] === 0) j++;
+        // Assign allocations starting from the highest cost
+        for (const {i, j, cost} of sortedCosts) {
+            if (remainingSupplies[i] <= 0 || remainingDemands[j] <= 0) continue;
+            
+            const allocation = Math.min(remainingSupplies[i], remainingDemands[j]);
+            allocations[i][j] = allocation;
+            totalCost += allocation * cost;
+            
+            remainingSupplies[i] -= allocation;
+            remainingDemands[j] -= allocation;
+            iterations++;
+        }
+    } 
+    // For minimization (original northwest corner algorithm)
+    else {
+        // Northwest Corner algorithm
+        while (i < supplyNodes.length && j < demandNodes.length) {
+            iterations++;
+            const supply = supplies[i];
+            const demand = demands[j];
+            
+            if (supply <= 0 || demand <= 0) {
+                // Skip if no supply or demand left
+                if (supply <= 0) i++;
+                if (demand <= 0) j++;
+                continue;
+            }
+            
+            const allocation = Math.min(supply, demand);
+            allocations[i][j] = allocation;
+            
+            // Update supply and demand
+            supplies[i] -= allocation;
+            demands[j] -= allocation;
+            
+            // Calculate cost
+            totalCost += allocation * costMatrix[i][j];
+            
+            // Move to next cell
+            if (supplies[i] === 0) i++;
+            if (demands[j] === 0) j++;
+        }
     }
 
-    // Prepare cost information for visualization
-    const costDetails = supplyNodes.map((fromId, i) => {
-        return demandNodes.map((toId, j) => {
-            return {
-                from: fromId,
-                to: toId,
-                cost: parseInt(matrix[nodeIds.indexOf(fromId)][nodeIds.indexOf(toId)]) || 0
-            };
-        });
-    });
-
     return {
-        allocations,
-        totalCost: isMaximization ? totalCost : totalCost,
-        iterations,
-        supplyNodes,
-        demandNodes,
-        costDetails
+        totalCost,
+        iterations
     };
 }
 
 function visualizeNorthwestResults(results) {
-    const { totalCost, iterations, allocations, supplyNodes, demandNodes, costDetails } = results;
+    const { totalCost, iterations } = results;
     
     // Color all nodes orange to indicate algorithm was applied
     nodes.get().forEach(node => {
@@ -808,26 +827,9 @@ function visualizeNorthwestResults(results) {
     const modal = document.getElementById('northwestModal');
     const resultsDiv = document.getElementById('northwestResults');
     
-    // Create allocation details HTML
-    let allocationDetails = '<div style="margin-top: 10px;"><h4>Asignaciones:</h4><ul>';
-    
-    for (let i = 0; i < supplyNodes.length; i++) {
-        for (let j = 0; j < demandNodes.length; j++) {
-            if (allocations[i][j] > 0) {
-                const fromNode = nodes.get(supplyNodes[i]);
-                const toNode = nodes.get(demandNodes[j]);
-                const cost = costDetails[i][j].cost;
-                allocationDetails += `<li>${fromNode.label} → ${toNode.label}: ${allocations[i][j]} × ${cost} = ${allocations[i][j] * cost}</li>`;
-            }
-        }
-    }
-    
-    allocationDetails += '</ul></div>';
-    
     resultsDiv.innerHTML = `
         <p>Iteraciones: <span id="iterationCount">${iterations}</span></p>
         <p>Costo total = <span id="northwestTotalCost">${totalCost}</span></p>
-        ${allocationDetails}
     `;
     
     modal.style.display = 'block';
