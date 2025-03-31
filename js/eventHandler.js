@@ -83,7 +83,7 @@ const modalHTML = `
 <div id="assignmentModal" class="modal" style="display: none;">
     <div class="modal-content">
         <span class="close-modal">&times;</span>
-        <h3>Resultado Asignación</h3>
+        <h3 style="color: #33FF80;">Resultado Asignación</h3>
         <div id="assignmentResults"></div>
     </div>
 </div>
@@ -119,7 +119,7 @@ const modalStyles = `
 }
 
 .close-modal:hover {
-    color: #B2A1FF;
+    color: #33FF80;
 }
 
 #assignmentResults {
@@ -136,7 +136,7 @@ const modalStyles = `
     margin-top: 10px;
     font-weight: bold;
     padding-top: 5px;
-    border-top: 2px solid #B2A1FF;
+    border-top: 2px solid #33FF80;
 }
 `;
 const styleElement = document.createElement('style');
@@ -748,10 +748,10 @@ function visualizeAssignments(results) {
 
 // Modal Noroeste
 const northwestModalHTML = `
-<div id="northwestModal" class="modal" style="display: none;">
+<div id="northwestModal" class="modal" style="display: none; cursor: pointer;">
     <div class="modal-content">
         <span class="close-northwest-modal">&times;</span>
-        <h3>Resultado Noroeste</h3>
+        <h3 style="color: #33FF80;">Resultado Noroeste</h3>
         <div id="northwestResults">
             <p>Iteraciones: <span id="iterationCount">0</span></p>
             <p>Costo total = <span id="northwestTotalCost">0</span></p>
@@ -886,7 +886,7 @@ function visualizeNorthwestResults(results) {
     nodes.get().forEach(node => {
         nodes.update({
             id: node.id,
-            color: '#FF6800'
+            color: '#33FF80'
         });
     });
 
@@ -1053,10 +1053,10 @@ addValueBtn.addEventListener('click', function() {
             // Update node label
             const node = nodes.get(selectedNodeId);
             const isSupply = edges.get().some(edge => edge.from === selectedNodeId);
-            const prefix = isSupply ? 'S=' : 'D=';
+            const prefix = isSupply ? 's:' : 'd:';
             nodes.update({
                 id: selectedNodeId,
-                label: `Nodo ${selectedNodeId} ${prefix}${newValue}`
+                label: `Nodo ${selectedNodeId}\n${prefix}${newValue}`
             });
         }
         nodeContextMenu.style.display = 'none';
