@@ -155,7 +155,7 @@ network.on("hoverEdge", function(params) {
     
     edgeContextButton.style.display = 'block';
     edgeContextButton.style.left = pointer.x + 'px';
-    edgeContextButton.style.top = pointer.y + 'px';
+    edgeContextButton.style.top = (pointer.y + 90) + 'px';
 });
 
 network.on("blurEdge", function() {
