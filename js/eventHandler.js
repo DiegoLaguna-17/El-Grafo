@@ -9,6 +9,14 @@ const options = {
     nodes: {
         shape: 'circle',
         color: '#00E3C6',
+        size: 30,
+        scaling: {
+            min: 30,
+            max: 30,
+            label: {
+                enabled: false
+            }
+        },
         physics: false,
     },
     edges: {
