@@ -5,8 +5,6 @@
     background-color: #f9f9f9;
 }
 
-
-/* Edge context button styling */
 .edge-context-button {
     background: white;
     border: 1px solid #ccc;
@@ -40,7 +38,6 @@
     align-items: center;
 }
 
-/* Edge label styling  */
 .vis-edge .vis-label {
     cursor: pointer;
     pointer-events: all;
@@ -58,7 +55,6 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* Adjacency Matrix Styles */
 .matriz-container {
     background-color: #333;
     border-radius: 8px;
@@ -67,7 +63,7 @@
 }
 
 .matriz-container h1 {
-    color: #B2A1FF;
+    color: #00E3C6;
     margin-bottom: 15px;
     text-align: center;
 }
@@ -94,7 +90,7 @@
 }
 
 .matriz th {
-    background-color: #B2A1FF;
+    background-color: #D6FBF7;
     color: #222;
     font-weight: bold;
     position: sticky;
@@ -102,7 +98,7 @@
 }
 
 .matriz th:first-child {
-    background-color: #A4F5A6;
+    background-color: #51fceb;
 }
 
 .matriz td {
@@ -114,13 +110,8 @@
 }
 
 .empty-corner {
-    background-color: #A4F5A6 !important;
+    background-color: #51fceb !important;
 }
-
-
-
-
-
 
 * {
     margin: 0;
@@ -129,7 +120,7 @@
 }
 
 body {
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-family: 'Roboto Mono', monospace;
     background-color: #f4f4f4;
     min-height: 100vh;
     display: flex;
@@ -143,7 +134,7 @@ body {
     display: flex;
     width: 100%;
     min-height: 100vh; 
-    background-color: #222222;
+    background-color: #002729;
     position: relative;
     padding: 20px;
 }
@@ -152,7 +143,7 @@ body {
     position: absolute;
     top: 20px;
     left: 20px;
-    background-color: #B2A1FF;
+    background-color: #D6FBF7;
     border: none;
     border-radius: 5px;
     padding: 10px 20px;
@@ -163,7 +154,7 @@ body {
 }
 
 .menu-button:hover {
-    background-color: #9c8aff;
+    background-color: #89f6eb;
 }
 
 .sidebar {
@@ -257,20 +248,20 @@ body {
 }
 
 .controls button {
-    background-color: #B2A1FF;
+    background-color: #D6FBF7;
     border-radius: 20vh;
     height: 10vh;
     width: 20vh;
     color: #222222;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
     font-weight: bolder;
+    font-size: medium;
     border: 0;
     cursor: pointer;
     transition: background-color 0.3s;
 }
 
 .controls button:hover {
-    background-color: #9c8aff;
+    background-color: #89f6eb;
 }
 
 .context-menu {
@@ -293,7 +284,7 @@ body {
 }
 
 .context-menu button:hover {
-    background-color: #f0f0f0;
+    background-color: #d6fBf7;
 }
 
 .context-menu input[type="color"] {
@@ -321,7 +312,7 @@ body {
 
 .radio-button input[type="radio"]:checked + .radio-label {
     font-weight: bold;
-    color: #0059b8;
+    color: #00969C;
 }
 
 #currentAlgorithm {

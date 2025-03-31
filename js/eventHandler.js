@@ -60,12 +60,10 @@ const solve_btn = document.getElementById('solve-btn');
 const edgeContextButton = document.getElementById('edgeContextButton');
 const changeWeightBtn = document.getElementById('changeWeightBtn');
 
-
 const addValueBtn = document.createElement('button');
 addValueBtn.id = 'addValueBtn';
 addValueBtn.textContent = 'Agregar valor';
 nodeContextMenu.appendChild(addValueBtn);
-
 
 let isCreatingEdge = false;
 let sourceNodeId = null;
@@ -80,7 +78,7 @@ const colorPalette = [
     '#C06C84', '#6C5B7B', '#355C7D', '#A8E6CE'
 ];
 
-// Create modal for assignment results
+// Modal para asignación
 const modalHTML = `
 <div id="assignmentModal" class="modal" style="display: none;">
     <div class="modal-content">
@@ -92,7 +90,6 @@ const modalHTML = `
 `;
 document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-// Add modal styles
 const modalStyles = `
 .modal {
     position: fixed;
@@ -214,7 +211,7 @@ network.on("click", function(params) {
             label: `Nodo ${newNodeId}`,
             x: pointerPosition.x,
             y: pointerPosition.y,
-            value: 0, // Initialize with value=0
+            value: 0,
         });
         updateAdjacencyMatrix();
     }
@@ -487,7 +484,7 @@ function topologicalSort(nodeIds, edgesList) {
     return result;
 }
 
-// Add critical path modal HTML
+// Modal para Johnson
 const criticalPathModalHTML = `
 <div id="criticalPathModal" class="modal" style="display: none; bottom: 20px; left: 20px; cursor: pointer;">
     <div class="modal-content">
@@ -499,7 +496,6 @@ const criticalPathModalHTML = `
 `;
 document.body.insertAdjacentHTML('beforeend', criticalPathModalHTML);
 
-// Modify the visualizeCriticalPath function to show the modal
 function visualizeCriticalPath(results) {
     const { forwardPass, backwardPass, slack, criticalPath } = results;
     
@@ -750,7 +746,7 @@ function visualizeAssignments(results) {
     };
 }
 
-// Add Northwest Corner modal HTML
+// Modal Noroeste
 const northwestModalHTML = `
 <div id="northwestModal" class="modal" style="display: none;">
     <div class="modal-content">
@@ -765,7 +761,6 @@ const northwestModalHTML = `
 `;
 document.body.insertAdjacentHTML('beforeend', northwestModalHTML);
 
-// Northwest Corner Algorithm Implementation
 // Northwest Corner Algorithm Implementation
 function northwestCornerAlgorithm(isMaximization) {
     const nodeIds = nodes.getIds().sort((a, b) => a - b);
@@ -911,7 +906,6 @@ function visualizeNorthwestResults(results) {
     };
 }
 
-// Update solve button handler to include Northwest algorithm
 solve_btn.addEventListener('click', function() {
     const selectedAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
     
@@ -1049,9 +1043,6 @@ document.addEventListener('click', function(e) {
     }
 });
 
-
-
-
 addValueBtn.addEventListener('click', function() {
     if (selectedNodeId) {
         const currentValue = graph.getSupplyDemandValue(selectedNodeId);
@@ -1072,13 +1063,11 @@ addValueBtn.addEventListener('click', function() {
     }
 });
 
-
 function updateContextMenuVisibility() {
     const selectedAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
     addValueBtn.style.display = selectedAlgorithm === 'noroeste' ? 'block' : 'none';
 }
 
-// Also update when algorithm changes
 document.querySelectorAll('input[name="algorithm"]').forEach(radio => {
     radio.addEventListener('change', updateContextMenuVisibility);
 });
