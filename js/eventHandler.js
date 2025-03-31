@@ -73,9 +73,18 @@ let edgeButtonTimeout = null;
 
 // Color palette for assignments
 const colorPalette = [
-    '#FF9AA2', '#FFB7B2', '#FFDAC1', '#E2F0CB', 
-    '#B5EAD7', '#C7CEEA', '#F8B195', '#F67280',
-    '#C06C84', '#6C5B7B', '#355C7D', '#A8E6CE'
+    '#FF6B6B', // Vibrant coral-red
+    '#4ECDC4', // Bright teal
+    '#FFD166', // Sunny yellow
+    '#06D6A0', // Emerald green
+    '#118AB2', // Deep ocean blue
+    '#EF476F', // Electric pink
+    '#7F5AF0', // Purple-blue
+    '#F77F00', // Bold orange
+    '#A78BFA', // Soft lavender
+    '#10B981', // Fresh green
+    '#F43F5E', // Ruby red
+    '#0EA5E9'  // Sky blue
 ];
 
 // Modal para asignación
