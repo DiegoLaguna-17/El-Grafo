@@ -52,6 +52,13 @@ const solve_btn = document.getElementById('solve-btn');
 const edgeContextButton = document.getElementById('edgeContextButton');
 const changeWeightBtn = document.getElementById('changeWeightBtn');
 
+
+const addValueBtn = document.createElement('button');
+addValueBtn.id = 'addValueBtn';
+addValueBtn.textContent = 'Agregar valor';
+nodeContextMenu.appendChild(addValueBtn);
+
+
 let isCreatingEdge = false;
 let sourceNodeId = null;
 let selectedNodeId = null;
@@ -199,6 +206,7 @@ network.on("click", function(params) {
             label: `Nodo ${newNodeId}`,
             x: pointerPosition.x,
             y: pointerPosition.y,
+            value: 0, // Initialize with value=0
         });
         updateAdjacencyMatrix();
     }
@@ -260,6 +268,7 @@ network.on('oncontext', function(params) {
     nodeContextMenu.style.display = 'block';
     nodeContextMenu.style.left = pointer.x + 'px';
     nodeContextMenu.style.top = pointer.y + 'px';
+    updateContextMenuVisibility();
 });
 
 addLoopBtn.addEventListener('click', function() {
@@ -693,42 +702,59 @@ function northwestCornerAlgorithm(isMaximization) {
         throw new Error("No hay nodos en el grafo");
     }
 
-    // Separate origins (first half) and destinations (second half)
-    const half = Math.ceil(nodeIds.length / 2);
-    const origins = nodeIds.slice(0, half);
-    const destinations = nodeIds.slice(half);
+    // Identify supply (origin) and demand (destination) nodes based on edge connections
+    const origins = new Set();
+    const destinations = new Set();
     
-    // Parse supply (offer) and demand values from node labels
-    const supplies = origins.map(id => {
-        const node = nodes.get(id);
-        return parseInt(node.label.replace(/\D/g, '')) || 0;
-    });
-    
-    const demands = destinations.map(id => {
-        const node = nodes.get(id);
-        return parseInt(node.label.replace(/\D/g, '')) || 0;
+    edges.get().forEach(edge => {
+        origins.add(edge.from);
+        destinations.add(edge.to);
     });
 
-    // Create cost matrix with origins as rows and destinations as columns
-    const costMatrix = origins.map((fromId, i) => {
+    // Convert to arrays
+    const supplyNodes = Array.from(origins);
+    const demandNodes = Array.from(destinations);
+
+    // Get supply and demand values from node attributes
+    const supplies = supplyNodes.map(id => graph.getSupplyDemandValue(id));
+    const demands = demandNodes.map(id => graph.getSupplyDemandValue(id));
+
+    // Check if total supply equals total demand
+    const totalSupply = supplies.reduce((a, b) => a + b, 0);
+    const totalDemand = demands.reduce((a, b) => a + b, 0);
+    
+    if (totalSupply !== totalDemand) {
+        throw new Error(`La oferta total (${totalSupply}) no coincide con la demanda total (${totalDemand})`);
+    }
+
+    // Create cost matrix with supply nodes as rows and demand nodes as columns
+    const costMatrix = supplyNodes.map((fromId, i) => {
         const fromIndex = nodeIds.indexOf(fromId);
-        return destinations.map((toId, j) => {
+        return demandNodes.map((toId, j) => {
             const toIndex = nodeIds.indexOf(toId);
-            return parseInt(matrix[fromIndex][toIndex]) || 0;
+            const cost = parseInt(matrix[fromIndex][toIndex]) || 0;
+            return isMaximization ? -cost : cost; // Handle maximization by negating costs
         });
     });
 
     // Initialize variables
-    const allocations = Array(origins.length).fill().map(() => Array(destinations.length).fill(0));
+    const allocations = Array(supplyNodes.length).fill().map(() => Array(demandNodes.length).fill(0));
     let totalCost = 0;
     let iterations = 0;
     let i = 0, j = 0;
 
     // Northwest Corner algorithm
-    while (i < origins.length && j < destinations.length) {
+    while (i < supplyNodes.length && j < demandNodes.length) {
         iterations++;
         const supply = supplies[i];
         const demand = demands[j];
+        
+        if (supply <= 0 || demand <= 0) {
+            // Skip if no supply or demand left
+            if (supply <= 0) i++;
+            if (demand <= 0) j++;
+            continue;
+        }
         
         const allocation = Math.min(supply, demand);
         allocations[i][j] = allocation;
@@ -737,28 +763,38 @@ function northwestCornerAlgorithm(isMaximization) {
         supplies[i] -= allocation;
         demands[j] -= allocation;
         
-        // Calculate cost (adjust for maximization if needed)
-        const cost = isMaximization ? -costMatrix[i][j] : costMatrix[i][j];
-        totalCost += allocation * costMatrix[i][j];
+        // Calculate cost (using original cost, not the negated one for maximization)
+        const originalCost = parseInt(matrix[nodeIds.indexOf(supplyNodes[i])][nodeIds.indexOf(demandNodes[j])]) || 0;
+        totalCost += allocation * originalCost;
         
         // Move to next cell
-        if (supplies[i] === 0) {
-            i++;
-        }
-        if (demands[j] === 0) {
-            j++;
-        }
+        if (supplies[i] === 0) i++;
+        if (demands[j] === 0) j++;
     }
+
+    // Prepare cost information for visualization
+    const costDetails = supplyNodes.map((fromId, i) => {
+        return demandNodes.map((toId, j) => {
+            return {
+                from: fromId,
+                to: toId,
+                cost: parseInt(matrix[nodeIds.indexOf(fromId)][nodeIds.indexOf(toId)]) || 0
+            };
+        });
+    });
 
     return {
         allocations,
-        totalCost: isMaximization ? -totalCost : totalCost,
-        iterations
+        totalCost: isMaximization ? totalCost : totalCost,
+        iterations,
+        supplyNodes,
+        demandNodes,
+        costDetails
     };
 }
 
 function visualizeNorthwestResults(results) {
-    const { totalCost, iterations } = results;
+    const { totalCost, iterations, allocations, supplyNodes, demandNodes, costDetails } = results;
     
     // Color all nodes orange to indicate algorithm was applied
     nodes.get().forEach(node => {
@@ -770,8 +806,29 @@ function visualizeNorthwestResults(results) {
 
     // Show results in modal
     const modal = document.getElementById('northwestModal');
-    document.getElementById('iterationCount').textContent = iterations;
-    document.getElementById('northwestTotalCost').textContent = totalCost;
+    const resultsDiv = document.getElementById('northwestResults');
+    
+    // Create allocation details HTML
+    let allocationDetails = '<div style="margin-top: 10px;"><h4>Asignaciones:</h4><ul>';
+    
+    for (let i = 0; i < supplyNodes.length; i++) {
+        for (let j = 0; j < demandNodes.length; j++) {
+            if (allocations[i][j] > 0) {
+                const fromNode = nodes.get(supplyNodes[i]);
+                const toNode = nodes.get(demandNodes[j]);
+                const cost = costDetails[i][j].cost;
+                allocationDetails += `<li>${fromNode.label} → ${toNode.label}: ${allocations[i][j]} × ${cost} = ${allocations[i][j] * cost}</li>`;
+            }
+        }
+    }
+    
+    allocationDetails += '</ul></div>';
+    
+    resultsDiv.innerHTML = `
+        <p>Iteraciones: <span id="iterationCount">${iterations}</span></p>
+        <p>Costo total = <span id="northwestTotalCost">${totalCost}</span></p>
+        ${allocationDetails}
+    `;
     
     modal.style.display = 'block';
     
@@ -915,4 +972,38 @@ document.addEventListener('click', function(e) {
     if (e.button !== 2) { 
         nodeContextMenu.style.display = 'none';
     }
+});
+
+
+
+
+addValueBtn.addEventListener('click', function() {
+    if (selectedNodeId) {
+        const currentValue = graph.getSupplyDemandValue(selectedNodeId);
+        const newValue = prompt('Ingrese valor de oferta/demanda:', currentValue);
+        if (newValue !== null) {
+            graph.setSupplyDemandValue(selectedNodeId, newValue);
+            
+            // Update node label
+            const node = nodes.get(selectedNodeId);
+            const isSupply = edges.get().some(edge => edge.from === selectedNodeId);
+            const prefix = isSupply ? 'S=' : 'D=';
+            nodes.update({
+                id: selectedNodeId,
+                label: `Nodo ${selectedNodeId} ${prefix}${newValue}`
+            });
+        }
+        nodeContextMenu.style.display = 'none';
+    }
+});
+
+
+function updateContextMenuVisibility() {
+    const selectedAlgorithm = document.querySelector('input[name="algorithm"]:checked').value;
+    addValueBtn.style.display = selectedAlgorithm === 'noroeste' ? 'block' : 'none';
+}
+
+// Also update when algorithm changes
+document.querySelectorAll('input[name="algorithm"]').forEach(radio => {
+    radio.addEventListener('change', updateContextMenuVisibility);
 });

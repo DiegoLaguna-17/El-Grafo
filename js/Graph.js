@@ -83,4 +83,26 @@ export default class Graph {
             return edge.from === id || edge.to === id;
         }));
     }
+
+    /**
+     * Gets the supply/demand value of a node
+     * @param {number|string} id 
+     * @returns {number} The value (0 if not set)
+     */
+    getSupplyDemandValue(id) {
+        const node = this.getNode(id);
+        return node?.value || 0;
+    }
+
+    /**
+     * Sets the supply/demand value of a node
+     * @param {number|string} id 
+     * @param {number} value 
+     */
+    setSupplyDemandValue(id, value) {
+        this.nodes.update({
+            id,
+            value: parseInt(value) || 0
+        });
+    }
 }
