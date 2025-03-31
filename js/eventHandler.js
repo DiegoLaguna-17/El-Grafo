@@ -344,7 +344,8 @@ guardarGrafo.addEventListener('click', function() {
     
     const downloadLink = document.createElement('a');
     downloadLink.href = URL.createObjectURL(dataBlob);
-    downloadLink.download = 'graph.json';
+    const fileName = prompt("Nombre del archivo:", "graph");
+    downloadLink.download = (fileName || 'graph') + '.json';
     
     document.body.appendChild(downloadLink);
     downloadLink.click();
@@ -486,15 +487,60 @@ function topologicalSort(nodeIds, edgesList) {
     return result;
 }
 
+// Add critical path modal HTML
+const criticalPathModalHTML = `
+<div id="criticalPathModal" class="modal" style="display: none; bottom: 20px; left: 20px; cursor: pointer;">
+    <div class="modal-content">
+        <span class="close-critical-path-modal">&times;</span>
+        <h3 style="color: yellow;">Solución</h3>
+        <div id="criticalPathNodes"></div>
+    </div>
+</div>
+`;
+document.body.insertAdjacentHTML('beforeend', criticalPathModalHTML);
+
+// Modify the visualizeCriticalPath function to show the modal
 function visualizeCriticalPath(results) {
     const { forwardPass, backwardPass, slack, criticalPath } = results;
     
     const criticalNodes = new Set();
-    edges.get(criticalPath).forEach(edge => {
-        criticalNodes.add(edge.from);
-        criticalNodes.add(edge.to);
-    });
+    const nodeOrder = [];
     
+    // Get all edges in the critical path
+    const criticalEdges = edges.get(criticalPath);
+    
+    // Find the starting node (node with no incoming critical edges)
+    let currentNode = null;
+    for (const edge of criticalEdges) {
+        const isStartNode = !criticalEdges.some(e => e.to === edge.from);
+        if (isStartNode) {
+            currentNode = edge.from;
+            break;
+        }
+    }
+    
+    // If we didn't find a start node, just pick the first one
+    if (!currentNode && criticalEdges.length > 0) {
+        currentNode = criticalEdges[0].from;
+    }
+    
+    // Reconstruct the path by following the edges
+    const pathNodes = [];
+    if (currentNode) {
+        pathNodes.push(currentNode);
+        criticalNodes.add(currentNode);
+        
+        while (true) {
+            const nextEdge = criticalEdges.find(e => e.from === currentNode);
+            if (!nextEdge) break;
+            
+            currentNode = nextEdge.to;
+            pathNodes.push(currentNode);
+            criticalNodes.add(currentNode);
+        }
+    }
+    
+    // Color nodes and edges
     nodes.get().forEach(node => {
         const isCritical = criticalNodes.has(node.id);
         nodes.update({
@@ -520,6 +566,24 @@ function visualizeCriticalPath(results) {
             width: isCritical ? 3 : 2
         });
     });
+    
+    // Show critical path in modal
+    const modal = document.getElementById('criticalPathModal');
+    const pathDiv = document.getElementById('criticalPathNodes');
+    
+    // Format the path as "Node 1 -> Node 2 -> ..."
+    const pathText = pathNodes.map(id => {
+        const node = nodes.get(id);
+        return node.label ? node.label.split('\n')[0] : `Node ${id}`;
+    }).join(' → ');
+    
+    pathDiv.textContent = pathText;
+    modal.style.display = 'block';
+    
+    // Close modal handler
+    document.querySelector('.close-critical-path-modal').onclick = function() {
+        modal.style.display = 'none';
+    };
 }
 
 function hungarianAlgorithm(isMaximization) {
@@ -892,6 +956,7 @@ solve_btn.addEventListener('click', function() {
             });
         });
         
+        document.getElementById('criticalPathModal').style.display = 'none';
         document.getElementById('assignmentModal').style.display = 'none';
         document.getElementById('northwestModal').style.display = 'none';
     }
